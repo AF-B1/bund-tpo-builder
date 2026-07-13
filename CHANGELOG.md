@@ -2,6 +2,15 @@
 
 All notable changes to Bund TPO Builder.
 
+## [1.1.2] — 2026-07-13
+
+### Added
+- Regression tests for contextual sidebar tutorial hints (`tests/session-status.test.js`)
+- Compound docs for v1.1.1 tutorial fix and render testing pattern
+
+### Changed
+- Rebuilt standalone share bundle (`share/Bund-TPO-Builder.html`)
+
 ## [1.1.1] — 2026-07-13
 
 ### Fixed
@@ -39,4 +48,7 @@ First public release.
 - GitHub Pages live link
 - Standalone zip for local use (`START HERE.bat`)
 
+[1.1.2]: https://github.com/AF-B1/bund-tpo-builder/releases/tag/v1.1.2
+[1.1.1]: https://github.com/AF-B1/bund-tpo-builder/releases/tag/v1.1.1
+[1.1.0]: https://github.com/AF-B1/bund-tpo-builder/releases/tag/v1.1.0
 [1.0.0]: https://github.com/AF-B1/bund-tpo-builder/releases/tag/v1.0.0

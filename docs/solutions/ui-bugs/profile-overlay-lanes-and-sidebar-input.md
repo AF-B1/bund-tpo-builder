@@ -4,7 +4,7 @@ tags: [initial-balance, layout, overflow, custom-open-price, event-listeners]
 problem_type: ui_bug
 track: bug
 date: 2026-07-13
-symptoms: [ibr-bar-invisible, wide-gap-between-columns, duplicate-enter-handler]
+symptoms: [ibr-bar-invisible, wide-gap-between-columns, duplicate-enter-handler, wrong-tutorial-while-price-input]
 ---
 
 # Full profile overlays clipped; layout gaps; sidebar input listeners
@@ -14,6 +14,7 @@ symptoms: [ibr-bar-invisible, wide-gap-between-columns, duplicate-enter-handler]
 1. **Initial Balance orange bar** calculated correctly but **not visible** in column 3.
 2. **Large empty gap** between split builder and full profile when side-by-side.
 3. After **reset**, open-price **Enter** could fire multiple times (stacked listeners).
+4. **Sidebar tutorial** still said “Enter → show full profile” while the price input was visible (Enter actually sets open).
 
 ## What didn't work
 
@@ -44,6 +45,17 @@ Session progress + tutorial live only in col 1; builder and profile get **full h
 - Empty grid → sidebar shows price input (decimal required, e.g. `125.50`)
 - `state.startPrice` drives ladder via `priceAtTickIndex(tick, state.startPrice)`
 - `data-bound="true"` on input before attaching `keydown` listener
+
+### Contextual tutorial (v1.1.1)
+
+`renderSessionStatus` builds two `guideBlock` variants from `hasPrints(state)`:
+
+- **No prints** — price input + “Enter to set open price” + decimal hint
+- **Session started** — arrow keys, “Enter show full profile”, Delete, R
+
+Same gate drives `statusBlock` (input vs live print status). One boolean keeps UI and hints aligned on load, reset, and delete-all.
+
+Regression: `tests/session-status.test.js` asserts HTML contains / excludes the right strings per mode.
 
 ## Why this works
 

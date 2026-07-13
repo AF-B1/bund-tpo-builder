@@ -64,7 +64,7 @@ export function renderSessionStatus(container, state) {
     ${statusBlock}
     <div class="status-guide">
       ${guideBlock}
-      <p class="changelog-link"><a href="changelog.html">Changelog</a> · v1.1.1</p>
+      <p class="changelog-link"><a href="changelog.html">Changelog</a> · v1.1.2</p>
     </div>
   `;
 }
