@@ -99,6 +99,10 @@ Send `C:\Users\Guest-B\Documents\Bund-TPO-Builder.zip` to people who prefer a lo
 | Delete | Erase letter |
 | R | Reset session |
 
+## Institutional memory
+
+Past learnings (Pages setup, sharing, UI pitfalls): [`docs/solutions/`](docs/solutions/README.md)
+
 ## Project layout
 
 ```
