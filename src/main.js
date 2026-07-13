@@ -14,8 +14,9 @@ const statusRoot = document.getElementById('session-status');
 
 function bindStartPriceInput() {
   const input = statusRoot.querySelector('.start-price-input');
-  if (!input) return;
+  if (!input || input.dataset.bound === 'true') return;
 
+  input.dataset.bound = 'true';
   input.addEventListener('keydown', (event) => {
     if (event.key !== 'Enter') return;
 
