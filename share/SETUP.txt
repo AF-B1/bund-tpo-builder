@@ -1,0 +1,22 @@
+BUND TPO BUILDER
+================
+
+Nothing to install. Works on Windows with Chrome, Edge, or Firefox.
+
+1. Unzip this folder anywhere.
+2. Double-click:  START HERE.bat
+
+That's it. The app opens in your browser.
+
+KEYS
+----
+↑ ↓   move price and print
+→     next period
+←     previous period
+Enter show full profile
+Delete erase letter
+R     reset session
+
+TROUBLESHOOTING
+---------------
+If START HERE.bat does nothing, double-click Bund-TPO-Builder.html instead.

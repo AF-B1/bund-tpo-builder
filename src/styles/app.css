@@ -1,0 +1,394 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Consolas', 'Courier New', monospace;
+  background: #a8a8a8;
+}
+
+#app-shell {
+  height: 100vh;
+  width: 100vw;
+  background: #b8b8b8;
+}
+
+.workspace {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+.panel {
+  position: relative;
+  background: #b8b8b8;
+}
+
+/* ── Column 1: Session sidebar ──────────────────────────── */
+
+.session-sidebar {
+  flex: 0 0 132px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow-y: auto;
+  padding: 8px 6px 10px;
+  border-right: 1px solid #999;
+  background: #c4c4c4;
+  color: #222;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.session-progress {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+}
+
+.progress-title {
+  font-weight: bold;
+  color: #333;
+  font-size: 10px;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.progress-v-layout {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 4px;
+}
+
+.progress-v {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  height: 100%;
+  min-height: 0;
+}
+
+.progress-start,
+.progress-end {
+  font-size: 9px;
+  color: #444;
+  flex-shrink: 0;
+}
+
+.progress-track-v {
+  position: relative;
+  flex: 1 1 auto;
+  width: 12px;
+  min-height: 0;
+  background: #a0a0a0;
+  border: 1px solid #888;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill-v {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(180deg, #8a308a, #c000c0);
+  transition: height 0.15s ease;
+}
+
+.progress-segments-v {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.progress-segment {
+  text-align: center;
+  font-size: 9px;
+  color: #666;
+  padding: 1px 0;
+  border-radius: 2px;
+  background: #b0b0b0;
+}
+
+.progress-segment.done {
+  background: #9a509a;
+  color: #fff;
+}
+
+.progress-segment.current {
+  background: #c000c0;
+  color: #fff;
+  font-weight: bold;
+}
+
+.status-current {
+  flex-shrink: 0;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #aaa;
+}
+
+.status-print {
+  font-size: 15px;
+  font-weight: bold;
+  color: #111;
+  margin-bottom: 4px;
+}
+
+.status-letter {
+  color: #a000a0;
+  font-size: 17px;
+}
+
+.status-time {
+  font-size: 11px;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.status-price {
+  font-size: 11px;
+  color: #555;
+}
+
+.status-guide {
+  flex-shrink: 0;
+  margin: 0;
+  font-size: 10px;
+  color: #444;
+}
+
+.status-guide p {
+  margin: 0 0 5px;
+}
+
+.status-guide p:last-child {
+  margin-bottom: 0;
+}
+
+.status-teach {
+  margin-top: 8px !important;
+  color: #555;
+  font-style: italic;
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+/* ── Column 2: Split builder ────────────────────────────── */
+
+.split-panel {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100vh;
+  overflow: auto;
+  padding: 4px;
+}
+
+#app-shell.side-by-side .split-panel {
+  flex: 0 0 auto;
+  width: max-content;
+  min-width: 0;
+  padding-right: 0;
+}
+
+#split-view {
+  width: max-content;
+}
+
+/* ── Column 3: Full profile ─────────────────────────────── */
+
+#app-shell.split-only .full-panel {
+  display: none;
+}
+
+#app-shell.side-by-side .full-panel {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  height: 100vh;
+  overflow: auto;
+  margin-left: 2px;
+  padding: 4px 4px 4px 2px;
+  border-left: 1px solid #888;
+}
+
+#app-shell.side-by-side #full-profile {
+  padding-left: 6px;
+}
+
+.status-guide kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  border: 1px solid #888;
+  border-radius: 3px;
+  background: #d8d8d8;
+  font-family: inherit;
+  font-size: 10px;
+  color: #222;
+}
+
+.split-grid {
+  display: grid;
+  grid-template-columns: 58px repeat(var(--periods), 20px);
+  grid-auto-rows: 18px;
+  background: #b8b8b8;
+  width: max-content;
+}
+
+.split-corner {
+  grid-row: 1;
+  grid-column: 1;
+  font-size: 11px;
+  font-weight: bold;
+  color: #333;
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 2px;
+}
+
+.split-period-header {
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  font-size: 10px;
+  line-height: 1.1;
+  color: #222;
+  padding-bottom: 1px;
+  border-bottom: 1px solid #999;
+}
+
+.period-letter {
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.period-time {
+  font-size: 8px;
+  white-space: nowrap;
+  color: #444;
+}
+
+.split-price {
+  font-size: 13px;
+  text-align: right;
+  padding-right: 4px;
+  color: #111;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  border-right: 1px solid #999;
+}
+
+.split-price.cursor-price {
+  font-weight: bold;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.split-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #111;
+  border-right: 1px solid #aaa;
+  border-bottom: 1px solid #aaa;
+  min-width: 20px;
+  min-height: 18px;
+}
+
+.split-cell.early-letter {
+  color: #c000c0;
+}
+
+.split-cell.active-cursor {
+  outline: 1px solid #333;
+  outline-offset: -1px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* ── Full Profile ─────────────────────────────────────────── */
+
+#full-profile {
+  position: relative;
+  padding: 4px 2px 4px 8px;
+}
+
+#full-profile.empty {
+  display: none;
+}
+
+.full-profile-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.ibr-bar {
+  position: absolute;
+  left: -14px;
+  width: 6px;
+  background: #e07020;
+  border-radius: 1px;
+  pointer-events: none;
+}
+
+.close-marker {
+  position: absolute;
+  left: -16px;
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 8px solid #cc0000;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.full-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.full-row {
+  height: 18px;
+  display: flex;
+  align-items: center;
+}
+
+.full-letter {
+  font-size: 14px;
+  letter-spacing: 0;
+  color: #111;
+  white-space: nowrap;
+  line-height: 18px;
+}
+
+.full-letter.in-va {
+  color: #c000c0;
+}
+
+.full-row.is-poc .full-letter {
+  background: #a00090;
+  color: #fff;
+  padding: 0 4px;
+  border-radius: 1px;
+}

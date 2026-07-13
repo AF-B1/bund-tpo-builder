@@ -1,0 +1,13 @@
+BUND TPO BUILDER — QUICK SETUP (for you, the developer)
+=======================================================
+
+TO SHARE WITH OTHERS (no install needed):
+  Send them:  C:\Users\Guest-B\Documents\Bund-TPO-Builder.zip
+  They unzip and double-click START HERE.bat
+
+TO RUN YOUR DEV VERSION (with separate source files):
+  Double-click:  Start TPO Builder.bat  (needs Node.js)
+
+REBUILD THE SHARE ZIP after code changes:
+  powershell -File tools\make-standalone.ps1
+  Then copy dist\Bund-TPO-Builder.html to share\ and re-zip share\

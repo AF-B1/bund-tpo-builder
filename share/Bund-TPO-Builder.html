@@ -1,0 +1,868 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bund TPO Builder</title>
+  <style>
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Consolas', 'Courier New', monospace;
+  background: #a8a8a8;
+}
+
+#app-shell {
+  height: 100vh;
+  width: 100vw;
+  background: #b8b8b8;
+}
+
+.workspace {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+.panel {
+  position: relative;
+  background: #b8b8b8;
+}
+
+/* â”€â”€ Column 1: Session sidebar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+.session-sidebar {
+  flex: 0 0 132px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow-y: auto;
+  padding: 8px 6px 10px;
+  border-right: 1px solid #999;
+  background: #c4c4c4;
+  color: #222;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.session-progress {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+}
+
+.progress-title {
+  font-weight: bold;
+  color: #333;
+  font-size: 10px;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.progress-v-layout {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 4px;
+}
+
+.progress-v {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  height: 100%;
+  min-height: 0;
+}
+
+.progress-start,
+.progress-end {
+  font-size: 9px;
+  color: #444;
+  flex-shrink: 0;
+}
+
+.progress-track-v {
+  position: relative;
+  flex: 1 1 auto;
+  width: 12px;
+  min-height: 0;
+  background: #a0a0a0;
+  border: 1px solid #888;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill-v {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(180deg, #8a308a, #c000c0);
+  transition: height 0.15s ease;
+}
+
+.progress-segments-v {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.progress-segment {
+  text-align: center;
+  font-size: 9px;
+  color: #666;
+  padding: 1px 0;
+  border-radius: 2px;
+  background: #b0b0b0;
+}
+
+.progress-segment.done {
+  background: #9a509a;
+  color: #fff;
+}
+
+.progress-segment.current {
+  background: #c000c0;
+  color: #fff;
+  font-weight: bold;
+}
+
+.status-current {
+  flex-shrink: 0;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #aaa;
+}
+
+.status-print {
+  font-size: 15px;
+  font-weight: bold;
+  color: #111;
+  margin-bottom: 4px;
+}
+
+.status-letter {
+  color: #a000a0;
+  font-size: 17px;
+}
+
+.status-time {
+  font-size: 11px;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.status-price {
+  font-size: 11px;
+  color: #555;
+}
+
+.status-guide {
+  flex-shrink: 0;
+  margin: 0;
+  font-size: 10px;
+  color: #444;
+}
+
+.status-guide p {
+  margin: 0 0 5px;
+}
+
+.status-guide p:last-child {
+  margin-bottom: 0;
+}
+
+.status-teach {
+  margin-top: 8px !important;
+  color: #555;
+  font-style: italic;
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+/* â”€â”€ Column 2: Split builder â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+.split-panel {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100vh;
+  overflow: auto;
+  padding: 4px;
+}
+
+#app-shell.side-by-side .split-panel {
+  flex: 0 0 auto;
+  width: max-content;
+  min-width: 0;
+  padding-right: 0;
+}
+
+#split-view {
+  width: max-content;
+}
+
+/* â”€â”€ Column 3: Full profile â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+#app-shell.split-only .full-panel {
+  display: none;
+}
+
+#app-shell.side-by-side .full-panel {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  height: 100vh;
+  overflow: auto;
+  margin-left: 2px;
+  padding: 4px 4px 4px 2px;
+  border-left: 1px solid #888;
+}
+
+#app-shell.side-by-side #full-profile {
+  padding-left: 6px;
+}
+
+.status-guide kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  border: 1px solid #888;
+  border-radius: 3px;
+  background: #d8d8d8;
+  font-family: inherit;
+  font-size: 10px;
+  color: #222;
+}
+
+.split-grid {
+  display: grid;
+  grid-template-columns: 58px repeat(var(--periods), 20px);
+  grid-auto-rows: 18px;
+  background: #b8b8b8;
+  width: max-content;
+}
+
+.split-corner {
+  grid-row: 1;
+  grid-column: 1;
+  font-size: 11px;
+  font-weight: bold;
+  color: #333;
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 2px;
+}
+
+.split-period-header {
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  font-size: 10px;
+  line-height: 1.1;
+  color: #222;
+  padding-bottom: 1px;
+  border-bottom: 1px solid #999;
+}
+
+.period-letter {
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.period-time {
+  font-size: 8px;
+  white-space: nowrap;
+  color: #444;
+}
+
+.split-price {
+  font-size: 13px;
+  text-align: right;
+  padding-right: 4px;
+  color: #111;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  border-right: 1px solid #999;
+}
+
+.split-price.cursor-price {
+  font-weight: bold;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.split-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #111;
+  border-right: 1px solid #aaa;
+  border-bottom: 1px solid #aaa;
+  min-width: 20px;
+  min-height: 18px;
+}
+
+.split-cell.early-letter {
+  color: #c000c0;
+}
+
+.split-cell.active-cursor {
+  outline: 1px solid #333;
+  outline-offset: -1px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* â”€â”€ Full Profile â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
+#full-profile {
+  position: relative;
+  padding: 4px 2px 4px 8px;
+}
+
+#full-profile.empty {
+  display: none;
+}
+
+.full-profile-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.ibr-bar {
+  position: absolute;
+  left: -14px;
+  width: 6px;
+  background: #e07020;
+  border-radius: 1px;
+  pointer-events: none;
+}
+
+.close-marker {
+  position: absolute;
+  left: -16px;
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 8px solid #cc0000;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.full-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.full-row {
+  height: 18px;
+  display: flex;
+  align-items: center;
+}
+
+.full-letter {
+  font-size: 14px;
+  letter-spacing: 0;
+  color: #111;
+  white-space: nowrap;
+  line-height: 18px;
+}
+
+.full-letter.in-va {
+  color: #c000c0;
+}
+
+.full-row.is-poc .full-letter {
+  background: #a00090;
+  color: #fff;
+  padding: 0 4px;
+  border-radius: 1px;
+}
+  </style>
+</head>
+<body>
+  <div id="app-shell" class="split-only">
+    <div class="workspace">
+      <aside id="session-status" class="session-sidebar" aria-live="polite"></aside>
+      <section class="panel split-panel" aria-label="Split View">
+        <div id="split-view"></div>
+      </section>
+      <section class="panel full-panel" aria-label="Full Profile" hidden>
+        <div id="full-profile"></div>
+      </section>
+    </div>
+  </div>
+  <script>
+const START_PRICE = 125.5;
+const TICK_SIZE = 0.01;
+const SESSION_START_HOUR = 7;
+const SESSION_START_MINUTE = 0;
+const PERIOD_MINUTES = 30;
+const INITIAL_PERIOD_COUNT = 19;
+const VISIBLE_ROWS = 30;
+const SCROLL_EDGE = 3;
+const ROW_HEIGHT = 18;
+const COL_WIDTH = 20;
+const PRICE_COL_WIDTH = 58;
+const VALUE_AREA_PCT = 0.688;
+const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const SESSION_END_LABEL = '16:30';
+
+function pad2(n) {
+  return String(n).padStart(2, '0');
+}
+
+function formatTime(totalMinutes) {
+  const h = Math.floor(totalMinutes / 60) % 24;
+  const m = totalMinutes % 60;
+  return `${pad2(h)}:${pad2(m)}`;
+}
+
+function generatePeriods(count = INITIAL_PERIOD_COUNT) {
+  const startMinutes = SESSION_START_HOUR * 60 + SESSION_START_MINUTE;
+  const periods = [];
+
+  for (let i = 0; i < count; i++) {
+    const periodStart = startMinutes + i * PERIOD_MINUTES;
+    const periodEnd = periodStart + PERIOD_MINUTES;
+    periods.push({
+      index: i,
+      letter: LETTERS[i],
+      timeRange: `${formatTime(periodStart)}â€“${formatTime(periodEnd)}`,
+      label: `${LETTERS[i]} ${formatTime(periodStart)}â€“${formatTime(periodEnd)}`,
+    });
+  }
+
+  return periods;
+}
+
+function priceAtTickIndex(tickIndex) {
+  return Number((START_PRICE + tickIndex * TICK_SIZE).toFixed(2));
+}
+
+function tickIndexFromPrice(price) {
+  return Math.round((price - START_PRICE) / TICK_SIZE);
+}
+
+function getCell(grid, tickIndex, periodIndex) {
+  return grid[`${tickIndex},${periodIndex}`] ?? null;
+}
+
+function setCell(grid, tickIndex, periodIndex, letter) {
+  if (letter) {
+    grid[`${tickIndex},${periodIndex}`] = letter;
+  } else {
+    delete grid[`${tickIndex},${periodIndex}`];
+  }
+}
+
+function createInitialState() {
+  const state = {
+    grid: {},
+    cursor: { periodIndex: 0, tickIndex: 0 },
+    lastPrint: { periodIndex: 0, tickIndex: 0 },
+    fullProfileRevealed: false,
+    visibleTickStart: -Math.floor(VISIBLE_ROWS / 2),
+    periods: generatePeriods(),
+  };
+
+  setCell(state.grid, 0, 0, 'A');
+  return state;
+}
+
+function resetState(state) {
+  const fresh = createInitialState();
+  Object.assign(state, fresh);
+  return state;
+}
+
+function getActiveTickIndices(grid) {
+  const ticks = new Set();
+  for (const key of Object.keys(grid)) {
+    const [tick] = key.split(',').map(Number);
+    ticks.add(tick);
+  }
+  return [...ticks].sort((a, b) => a - b);
+}
+
+function mergeProfile(grid, periodCount = INITIAL_PERIOD_COUNT) {
+  const ticks = getActiveTickIndices(grid);
+  const merged = {};
+
+  for (const tick of ticks) {
+    let letters = '';
+    for (let p = 0; p < periodCount; p++) {
+      const letter = getCell(grid, tick, p);
+      if (letter) letters += letter;
+    }
+    if (letters) merged[tick] = letters;
+  }
+
+  return merged;
+}
+
+function countTposPerRow(grid, periodCount = INITIAL_PERIOD_COUNT) {
+  const merged = mergeProfile(grid, periodCount);
+  const counts = {};
+  for (const [tick, letters] of Object.entries(merged)) {
+    counts[Number(tick)] = letters.length;
+  }
+  return counts;
+}
+
+function computePOC(counts) {
+  const entries = Object.entries(counts).map(([tick, count]) => [Number(tick), count]);
+  if (!entries.length) return null;
+
+  entries.sort((a, b) => (b[1] - a[1]) || (a[0] - b[0]));
+  return entries[0][0];
+}
+
+function computeValueArea(counts, pocIndex, pct = VALUE_AREA_PCT) {
+  if (pocIndex == null) return [];
+
+  const total = Object.values(counts).reduce((sum, n) => sum + n, 0);
+  if (total === 0) return [];
+
+  const target = Math.ceil(total * pct);
+  const included = new Set([pocIndex]);
+  let accumulated = counts[pocIndex] ?? 0;
+
+  let up = pocIndex - 1;
+  let down = pocIndex + 1;
+
+  while (accumulated < target && (up in counts || down in counts)) {
+    const upCount = up in counts ? counts[up] : -1;
+    const downCount = down in counts ? counts[down] : -1;
+
+    if (upCount >= downCount && upCount >= 0) {
+      included.add(up);
+      accumulated += upCount;
+      up--;
+    } else if (downCount >= 0) {
+      included.add(down);
+      accumulated += downCount;
+      down++;
+    } else {
+      break;
+    }
+  }
+
+  return [...included].sort((a, b) => a - b);
+}
+
+function computeIBR(grid) {
+  let min = null;
+  let max = null;
+
+  for (const key of Object.keys(grid)) {
+    const [tick, period] = key.split(',').map(Number);
+    if (period !== 0 && period !== 1) continue;
+    if (min === null || tick < min) min = tick;
+    if (max === null || tick > max) max = tick;
+  }
+
+  if (min === null) return null;
+  return { min, max };
+}
+
+function computeClose(lastPrint) {
+  if (!lastPrint) return null;
+  return priceAtTickIndex(lastPrint.tickIndex);
+}
+
+function computeAnalytics(state) {
+  const counts = countTposPerRow(state.grid, state.periods.length);
+  const pocIndex = computePOC(counts);
+  const valueArea = computeValueArea(counts, pocIndex);
+  const ibr = computeIBR(state.grid);
+  const merged = mergeProfile(state.grid, state.periods.length);
+  const closePrice = computeClose(state.lastPrint);
+
+  return { counts, pocIndex, valueArea, ibr, merged, closePrice, closeTick: state.lastPrint?.tickIndex ?? null };
+}
+
+function ensureVisibleWindow(state) {
+  const cursorOffset = state.cursor.tickIndex - state.visibleTickStart;
+
+  if (cursorOffset < SCROLL_EDGE) {
+    state.visibleTickStart = state.cursor.tickIndex - SCROLL_EDGE;
+  } else if (cursorOffset >= VISIBLE_ROWS - SCROLL_EDGE) {
+    state.visibleTickStart = state.cursor.tickIndex - (VISIBLE_ROWS - SCROLL_EDGE - 1);
+  }
+}
+
+function renderSplitView(container, state) {
+  ensureVisibleWindow(state);
+  container.innerHTML = '';
+
+  const table = document.createElement('div');
+  table.className = 'split-grid';
+  table.style.setProperty('--periods', state.periods.length);
+
+  const corner = document.createElement('div');
+  corner.className = 'split-corner';
+  corner.textContent = 'BUND';
+  table.appendChild(corner);
+
+  for (const period of state.periods) {
+    const header = document.createElement('div');
+    header.className = 'split-period-header';
+    header.title = period.label;
+    header.innerHTML = `<span class="period-letter">${period.letter}</span><span class="period-time">${period.timeRange}</span>`;
+    table.appendChild(header);
+  }
+
+  for (let row = 0; row < VISIBLE_ROWS; row++) {
+    const tickIndex = state.visibleTickStart + (VISIBLE_ROWS - 1 - row);
+
+    const priceLabel = document.createElement('div');
+    priceLabel.className = 'split-price' + (tickIndex === state.cursor.tickIndex ? ' cursor-price' : '');
+    priceLabel.textContent = priceAtTickIndex(tickIndex).toFixed(2);
+    table.appendChild(priceLabel);
+
+    for (let p = 0; p < state.periods.length; p++) {
+      const letter = getCell(state.grid, tickIndex, p);
+      const cell = document.createElement('div');
+      cell.className = 'split-cell';
+      if (letter) {
+        cell.textContent = letter;
+        if (letter === 'A' || letter === 'B') cell.classList.add('early-letter');
+      }
+      if (tickIndex === state.cursor.tickIndex && p === state.cursor.periodIndex) {
+        cell.classList.add('active-cursor');
+      }
+      table.appendChild(cell);
+    }
+  }
+
+  container.appendChild(table);
+}
+
+function renderFullProfile(container, state, analytics) {
+  container.innerHTML = '';
+
+  if (!Object.keys(analytics.merged).length) {
+    container.classList.add('empty');
+    return;
+  }
+
+  container.classList.remove('empty');
+
+  const ticks = Object.keys(analytics.merged).map(Number).sort((a, b) => b - a);
+  const maxTick = ticks[0];
+
+  const wrap = document.createElement('div');
+  wrap.className = 'full-profile-wrap';
+
+  if (analytics.ibr) {
+    const ibr = document.createElement('div');
+    ibr.className = 'ibr-bar';
+    ibr.style.top = `${tickOffset(maxTick, analytics.ibr.max)}px`;
+    ibr.style.height = `${(analytics.ibr.max - analytics.ibr.min + 1) * ROW_HEIGHT}px`;
+    wrap.appendChild(ibr);
+  }
+
+  if (analytics.closeTick != null) {
+    const close = document.createElement('div');
+    close.className = 'close-marker';
+    close.style.top = `${tickOffset(maxTick, analytics.closeTick) + 4}px`;
+    wrap.appendChild(close);
+  }
+
+  const column = document.createElement('div');
+  column.className = 'full-column';
+
+  for (const tick of ticks) {
+    const row = document.createElement('div');
+    row.className = 'full-row';
+    const isPoc = analytics.pocIndex === tick;
+    const inVA = analytics.valueArea.includes(tick);
+
+    if (isPoc) row.classList.add('is-poc');
+
+    const cell = document.createElement('span');
+    cell.className = 'full-letter' + (inVA && !isPoc ? ' in-va' : '');
+    cell.textContent = analytics.merged[tick];
+    row.appendChild(cell);
+    column.appendChild(row);
+  }
+
+  wrap.appendChild(column);
+  container.appendChild(wrap);
+}
+
+function tickOffset(maxTick, tick) {
+  return (maxTick - tick) * ROW_HEIGHT;
+}
+
+function applyLayout(shell, state) {
+  const revealed = state.fullProfileRevealed;
+  shell.classList.toggle('side-by-side', revealed);
+  shell.classList.toggle('split-only', !revealed);
+
+  const fullPanel = shell.querySelector('.full-panel');
+  if (fullPanel) {
+    fullPanel.hidden = !revealed;
+  }
+}
+
+function renderSessionStatus(container, state) {
+  const period = state.periods[state.cursor.periodIndex];
+  const price = priceAtTickIndex(state.cursor.tickIndex).toFixed(2);
+  const total = state.periods.length;
+  const progressPct = total <= 1 ? 0 : (state.cursor.periodIndex / (total - 1)) * 100;
+
+  const segments = state.periods.map((p, i) => {
+    let cls = 'progress-segment';
+    if (i < state.cursor.periodIndex) cls += ' done';
+    else if (i === state.cursor.periodIndex) cls += ' current';
+    return `<span class="${cls}" title="${p.label}">${p.letter}</span>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="session-progress">
+      <div class="progress-title">07:00 â€“ 16:30</div>
+      <div class="progress-v-layout">
+        <div class="progress-v" role="progressbar" aria-valuenow="${Math.round(progressPct)}" aria-valuemin="0" aria-valuemax="100" aria-label="Session from 07:00 to 16:30">
+          <span class="progress-start">07:00</span>
+          <div class="progress-track-v">
+            <div class="progress-fill-v" style="height: ${progressPct}%"></div>
+          </div>
+          <span class="progress-end">16:30</span>
+        </div>
+        <div class="progress-segments-v" aria-hidden="true">${segments}</div>
+      </div>
+    </div>
+    <div class="status-current">
+      <div class="status-print"><span class="status-letter">${period.letter}</span> print</div>
+      <div class="status-time">${period.timeRange}</div>
+      <div class="status-price">@ ${price}</div>
+    </div>
+    <div class="status-guide">
+      <p><kbd>â†‘</kbd> <kbd>â†“</kbd> price + print</p>
+      <p><kbd>â†’</kbd> next period</p>
+      <p><kbd>â†</kbd> previous</p>
+      <p><kbd>Enter</kbd> full profile</p>
+      <p><kbd>Delete</kbd> erase</p>
+      <p><kbd>R</kbd> reset</p>
+      <p class="status-teach">Build one period at a time. Each letter marks where price traded in that 30-minute bracket.</p>
+    </div>
+  `;
+}
+
+function handleKeyDown(event, state, onChange) {
+  const key = event.key;
+
+  if (key === 'ArrowUp') {
+    event.preventDefault();
+    state.cursor.tickIndex += 1;
+    printAtCursor(state);
+    onChange();
+    return;
+  }
+
+  if (key === 'ArrowDown') {
+    event.preventDefault();
+    state.cursor.tickIndex -= 1;
+    printAtCursor(state);
+    onChange();
+    return;
+  }
+
+  if (key === 'ArrowRight') {
+    event.preventDefault();
+    if (state.cursor.periodIndex < state.periods.length - 1) {
+      state.cursor.periodIndex += 1;
+      printAtCursor(state);
+      onChange();
+    }
+    return;
+  }
+
+  if (key === 'ArrowLeft') {
+    event.preventDefault();
+    if (state.cursor.periodIndex > 0) {
+      state.cursor.periodIndex -= 1;
+      onChange();
+    }
+    return;
+  }
+
+  if (key === 'Backspace' || key === 'Delete') {
+    event.preventDefault();
+    setCell(state.grid, state.cursor.tickIndex, state.cursor.periodIndex, null);
+    onChange();
+    return;
+  }
+
+  if (key === 'Enter') {
+    event.preventDefault();
+    if (!state.fullProfileRevealed) {
+      state.fullProfileRevealed = true;
+      onChange();
+    }
+    return;
+  }
+
+  if (key === 'r' || key === 'R') {
+    event.preventDefault();
+    if (confirm('Reset session? All TPO prints will be cleared.')) {
+      resetState(state);
+      onChange();
+    }
+  }
+}
+
+function printAtCursor(state) {
+  const letter = state.periods[state.cursor.periodIndex].letter;
+  setCell(state.grid, state.cursor.tickIndex, state.cursor.periodIndex, letter);
+  state.lastPrint = { ...state.cursor };
+}
+
+const state = createInitialState();
+const shell = document.getElementById('app-shell');
+const splitRoot = document.getElementById('split-view');
+const fullRoot = document.getElementById('full-profile');
+const statusRoot = document.getElementById('session-status');
+
+function render() {
+  applyLayout(shell, state);
+  renderSplitView(splitRoot, state);
+  renderSessionStatus(statusRoot, state);
+
+  if (state.fullProfileRevealed) {
+    const analytics = computeAnalytics(state);
+    renderFullProfile(fullRoot, state, analytics);
+  }
+}
+
+window.addEventListener('keydown', (event) => {
+  handleKeyDown(event, state, render);
+});
+
+render();
+  </script>
+</body>
+</html>
