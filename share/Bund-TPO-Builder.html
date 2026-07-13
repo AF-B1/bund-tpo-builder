@@ -199,6 +199,23 @@ body {
   line-height: 1.35;
 }
 
+.changelog-link {
+  margin-top: 10px !important;
+  margin-bottom: 0 !important;
+  font-size: 9px;
+  font-style: normal;
+}
+
+.changelog-link a {
+  color: #553355;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.changelog-link a:hover {
+  color: #a000a0;
+}
+
 /* â”€â”€ Column 2: Split builder â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .split-panel {
@@ -799,6 +816,7 @@ function renderSessionStatus(container, state) {
       <p><kbd>Delete</kbd> erase</p>
       <p><kbd>R</kbd> reset</p>
       <p class="status-teach">Build one period at a time. Each letter marks where price traded in that 30-minute bracket.</p>
+      <p class="changelog-link"><a href="changelog.html">Changelog</a> Â· v1.0.0</p>
     </div>
   `;
 }

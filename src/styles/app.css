@@ -192,6 +192,23 @@ body {
   line-height: 1.35;
 }
 
+.changelog-link {
+  margin-top: 10px !important;
+  margin-bottom: 0 !important;
+  font-size: 9px;
+  font-style: normal;
+}
+
+.changelog-link a {
+  color: #553355;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.changelog-link a:hover {
+  color: #a000a0;
+}
+
 /* ── Column 2: Split builder ────────────────────────────── */
 
 .split-panel {

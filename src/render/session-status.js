@@ -40,6 +40,7 @@ export function renderSessionStatus(container, state) {
       <p><kbd>Delete</kbd> erase</p>
       <p><kbd>R</kbd> reset</p>
       <p class="status-teach">Build one period at a time. Each letter marks where price traded in that 30-minute bracket.</p>
+      <p class="changelog-link"><a href="changelog.html">Changelog</a> · v1.0.0</p>
     </div>
   `;
 }
