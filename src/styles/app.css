@@ -377,7 +377,7 @@ body {
   height: 0;
   border-top: 5px solid transparent;
   border-bottom: 5px solid transparent;
-  border-left: 8px solid #cc0000;
+  border-right: 8px solid #cc0000;
   pointer-events: none;
   z-index: 3;
 }
