@@ -21,11 +21,13 @@ export function renderFullProfile(container, state, analytics) {
   leftLane.className = 'full-profile-lane full-profile-lane-left';
   leftLane.style.height = `${columnHeight}px`;
 
-  if (analytics.closeTick != null) {
-    const close = document.createElement('div');
-    close.className = 'close-marker';
-    close.style.top = `${tickOffset(maxTick, analytics.closeTick) + 4}px`;
-    leftLane.appendChild(close);
+  if (analytics.ibr) {
+    const ibr = document.createElement('div');
+    ibr.className = 'ibr-bar';
+    ibr.title = 'Initial Balance (A + B)';
+    ibr.style.top = `${tickOffset(maxTick, analytics.ibr.max)}px`;
+    ibr.style.height = `${(analytics.ibr.max - analytics.ibr.min + 1) * ROW_HEIGHT}px`;
+    leftLane.appendChild(ibr);
   }
 
   const column = document.createElement('div');
@@ -50,13 +52,11 @@ export function renderFullProfile(container, state, analytics) {
   rightLane.className = 'full-profile-lane full-profile-lane-right';
   rightLane.style.height = `${columnHeight}px`;
 
-  if (analytics.ibr) {
-    const ibr = document.createElement('div');
-    ibr.className = 'ibr-bar';
-    ibr.title = 'Initial Balance (A + B)';
-    ibr.style.top = `${tickOffset(maxTick, analytics.ibr.max)}px`;
-    ibr.style.height = `${(analytics.ibr.max - analytics.ibr.min + 1) * ROW_HEIGHT}px`;
-    rightLane.appendChild(ibr);
+  if (analytics.closeTick != null) {
+    const close = document.createElement('div');
+    close.className = 'close-marker';
+    close.style.top = `${tickOffset(maxTick, analytics.closeTick) + 4}px`;
+    rightLane.appendChild(close);
   }
 
   wrap.appendChild(leftLane);

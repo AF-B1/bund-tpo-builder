@@ -350,11 +350,10 @@ body {
 .full-profile-lane {
   position: relative;
   flex-shrink: 0;
-  width: 12px;
 }
 
 .full-profile-lane-left {
-  width: 10px;
+  width: 6px;
 }
 
 .full-profile-lane-right {
@@ -363,10 +362,9 @@ body {
 
 .ibr-bar {
   position: absolute;
-  left: 1px;
-  width: 7px;
+  left: 0;
+  width: 3px;
   background: #e85d04;
-  border: 1px solid #c44d00;
   border-radius: 1px;
   pointer-events: none;
   z-index: 2;
