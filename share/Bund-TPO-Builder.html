@@ -216,6 +216,33 @@ body {
   color: #a000a0;
 }
 
+.status-edit .status-print {
+  margin-bottom: 6px;
+}
+
+.start-price-input {
+  width: 100%;
+  max-width: 108px;
+  padding: 4px 6px;
+  font-family: inherit;
+  font-size: 13px;
+  border: 1px solid #888;
+  border-radius: 3px;
+  background: #e8e8e8;
+  color: #111;
+}
+
+.start-price-input:focus {
+  outline: 1px solid #a000a0;
+  background: #f4f4f4;
+}
+
+.status-hint {
+  margin-top: 5px;
+  font-size: 9px;
+  color: #555;
+}
+
 /* â”€â”€ Column 2: Split builder â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 .split-panel {
@@ -493,12 +520,12 @@ function generatePeriods(count = INITIAL_PERIOD_COUNT) {
   return periods;
 }
 
-function priceAtTickIndex(tickIndex) {
-  return Number((START_PRICE + tickIndex * TICK_SIZE).toFixed(2));
+function priceAtTickIndex(tickIndex, startPrice = START_PRICE) {
+  return Number((startPrice + tickIndex * TICK_SIZE).toFixed(2));
 }
 
-function tickIndexFromPrice(price) {
-  return Math.round((price - START_PRICE) / TICK_SIZE);
+function tickIndexFromPrice(price, startPrice = START_PRICE) {
+  return Math.round((price - startPrice) / TICK_SIZE);
 }
 
 function getCell(grid, tickIndex, periodIndex) {
@@ -513,22 +540,55 @@ function setCell(grid, tickIndex, periodIndex, letter) {
   }
 }
 
+function hasPrints(state) {
+  return Object.keys(state.grid).length > 0;
+}
+
+function parseStartPrice(raw) {
+  const trimmed = String(raw).trim();
+  if (!/^\d+\.\d+$/.test(trimmed)) {
+    return { ok: false, error: 'Enter a price with a decimal point (e.g. 125.50)' };
+  }
+
+  const value = Number(Number(trimmed).toFixed(2));
+  if (!Number.isFinite(value) || value <= 0) {
+    return { ok: false, error: 'Enter a valid price' };
+  }
+
+  return { ok: true, value };
+}
+
+function applyStartPrice(state, raw) {
+  const parsed = parseStartPrice(raw);
+  if (!parsed.ok) return parsed;
+
+  state.startPrice = parsed.value;
+  state.grid = {};
+  state.cursor = { periodIndex: 0, tickIndex: 0 };
+  state.visibleTickStart = -Math.floor(VISIBLE_ROWS / 2);
+  state.fullProfileRevealed = false;
+  setCell(state.grid, 0, 0, 'A');
+  state.lastPrint = { periodIndex: 0, tickIndex: 0 };
+
+  return { ok: true };
+}
+
 function createInitialState() {
-  const state = {
+  return {
     grid: {},
     cursor: { periodIndex: 0, tickIndex: 0 },
-    lastPrint: { periodIndex: 0, tickIndex: 0 },
+    lastPrint: null,
+    startPrice: START_PRICE,
     fullProfileRevealed: false,
     visibleTickStart: -Math.floor(VISIBLE_ROWS / 2),
     periods: generatePeriods(),
   };
-
-  setCell(state.grid, 0, 0, 'A');
-  return state;
 }
 
 function resetState(state) {
+  const savedStart = state.startPrice;
   const fresh = createInitialState();
+  fresh.startPrice = savedStart;
   Object.assign(state, fresh);
   return state;
 }
@@ -623,9 +683,9 @@ function computeIBR(grid) {
   return { min, max };
 }
 
-function computeClose(lastPrint) {
+function computeClose(lastPrint, startPrice) {
   if (!lastPrint) return null;
-  return priceAtTickIndex(lastPrint.tickIndex);
+  return priceAtTickIndex(lastPrint.tickIndex, startPrice);
 }
 
 function computeAnalytics(state) {
@@ -634,7 +694,7 @@ function computeAnalytics(state) {
   const valueArea = computeValueArea(counts, pocIndex);
   const ibr = computeIBR(state.grid);
   const merged = mergeProfile(state.grid, state.periods.length);
-  const closePrice = computeClose(state.lastPrint);
+  const closePrice = computeClose(state.lastPrint, state.startPrice);
 
   return { counts, pocIndex, valueArea, ibr, merged, closePrice, closeTick: state.lastPrint?.tickIndex ?? null };
 }
@@ -675,7 +735,7 @@ function renderSplitView(container, state) {
 
     const priceLabel = document.createElement('div');
     priceLabel.className = 'split-price' + (tickIndex === state.cursor.tickIndex ? ' cursor-price' : '');
-    priceLabel.textContent = priceAtTickIndex(tickIndex).toFixed(2);
+    priceLabel.textContent = priceAtTickIndex(tickIndex, state.startPrice).toFixed(2);
     table.appendChild(priceLabel);
 
     for (let p = 0; p < state.periods.length; p++) {
@@ -778,7 +838,6 @@ function applyLayout(shell, state) {
 
 function renderSessionStatus(container, state) {
   const period = state.periods[state.cursor.periodIndex];
-  const price = priceAtTickIndex(state.cursor.tickIndex).toFixed(2);
   const total = state.periods.length;
   const progressPct = total <= 1 ? 0 : (state.cursor.periodIndex / (total - 1)) * 100;
 
@@ -788,6 +847,26 @@ function renderSessionStatus(container, state) {
     else if (i === state.cursor.periodIndex) cls += ' current';
     return `<span class="${cls}" title="${p.label}">${p.letter}</span>`;
   }).join('');
+
+  const statusBlock = hasPrints(state)
+    ? `
+    <div class="status-current">
+      <div class="status-print"><span class="status-letter">${period.letter}</span> print</div>
+      <div class="status-time">${period.timeRange}</div>
+      <div class="status-price">@ ${priceAtTickIndex(state.cursor.tickIndex, state.startPrice).toFixed(2)}</div>
+    </div>`
+    : `
+    <div class="status-current status-edit">
+      <div class="status-print"><span class="status-letter">A</span> open</div>
+      <input
+        type="text"
+        class="start-price-input"
+        value="${state.startPrice.toFixed(2)}"
+        inputmode="decimal"
+        aria-label="Session open price"
+      />
+      <div class="status-hint">Enter to set open price</div>
+    </div>`;
 
   container.innerHTML = `
     <div class="session-progress">
@@ -803,26 +882,39 @@ function renderSessionStatus(container, state) {
         <div class="progress-segments-v" aria-hidden="true">${segments}</div>
       </div>
     </div>
-    <div class="status-current">
-      <div class="status-print"><span class="status-letter">${period.letter}</span> print</div>
-      <div class="status-time">${period.timeRange}</div>
-      <div class="status-price">@ ${price}</div>
-    </div>
+    ${statusBlock}
     <div class="status-guide">
       <p><kbd>â†‘</kbd> <kbd>â†“</kbd> price + print</p>
       <p><kbd>â†’</kbd> next period</p>
       <p><kbd>â†</kbd> previous</p>
-      <p><kbd>Enter</kbd> full profile</p>
+      <p><kbd>Enter</kbd> show full profile</p>
       <p><kbd>Delete</kbd> erase</p>
       <p><kbd>R</kbd> reset</p>
       <p class="status-teach">Build one period at a time. Each letter marks where price traded in that 30-minute bracket.</p>
-      <p class="changelog-link"><a href="changelog.html">Changelog</a> Â· v1.0.0</p>
+      <p class="changelog-link"><a href="changelog.html">Changelog</a> Â· v1.1.0</p>
     </div>
   `;
 }
 
 function handleKeyDown(event, state, onChange) {
+  if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+    return;
+  }
+
   const key = event.key;
+
+  if (key === 'r' || key === 'R') {
+    event.preventDefault();
+    if (confirm('Reset session? All TPO prints will be cleared.')) {
+      resetState(state);
+      onChange();
+    }
+    return;
+  }
+
+  if (!hasPrints(state)) {
+    return;
+  }
 
   if (key === 'ArrowUp') {
     event.preventDefault();
@@ -862,6 +954,10 @@ function handleKeyDown(event, state, onChange) {
   if (key === 'Backspace' || key === 'Delete') {
     event.preventDefault();
     setCell(state.grid, state.cursor.tickIndex, state.cursor.periodIndex, null);
+    if (!hasPrints(state)) {
+      state.lastPrint = null;
+      state.fullProfileRevealed = false;
+    }
     onChange();
     return;
   }
@@ -870,15 +966,6 @@ function handleKeyDown(event, state, onChange) {
     event.preventDefault();
     if (!state.fullProfileRevealed) {
       state.fullProfileRevealed = true;
-      onChange();
-    }
-    return;
-  }
-
-  if (key === 'r' || key === 'R') {
-    event.preventDefault();
-    if (confirm('Reset session? All TPO prints will be cleared.')) {
-      resetState(state);
       onChange();
     }
   }
@@ -896,14 +983,44 @@ const splitRoot = document.getElementById('split-view');
 const fullRoot = document.getElementById('full-profile');
 const statusRoot = document.getElementById('session-status');
 
+function bindStartPriceInput() {
+  const input = statusRoot.querySelector('.start-price-input');
+  if (!input) return;
+
+  input.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter') return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const result = applyStartPrice(state, input.value);
+    if (!result.ok) {
+      alert(result.error);
+      return;
+    }
+
+    render();
+  });
+
+  input.focus();
+  input.select();
+}
+
 function render() {
   applyLayout(shell, state);
   renderSplitView(splitRoot, state);
   renderSessionStatus(statusRoot, state);
 
-  if (state.fullProfileRevealed) {
+  if (!hasPrints(state)) {
+    bindStartPriceInput();
+  }
+
+  if (state.fullProfileRevealed && hasPrints(state)) {
     const analytics = computeAnalytics(state);
     renderFullProfile(fullRoot, state, analytics);
+  } else if (fullRoot) {
+    fullRoot.innerHTML = '';
+    fullRoot.classList.add('empty');
   }
 }
 

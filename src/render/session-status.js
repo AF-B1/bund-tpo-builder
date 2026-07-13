@@ -1,8 +1,7 @@
-import { priceAtTickIndex } from '../state.js';
+import { priceAtTickIndex, hasPrints } from '../state.js';
 
 export function renderSessionStatus(container, state) {
   const period = state.periods[state.cursor.periodIndex];
-  const price = priceAtTickIndex(state.cursor.tickIndex).toFixed(2);
   const total = state.periods.length;
   const progressPct = total <= 1 ? 0 : (state.cursor.periodIndex / (total - 1)) * 100;
 
@@ -12,6 +11,26 @@ export function renderSessionStatus(container, state) {
     else if (i === state.cursor.periodIndex) cls += ' current';
     return `<span class="${cls}" title="${p.label}">${p.letter}</span>`;
   }).join('');
+
+  const statusBlock = hasPrints(state)
+    ? `
+    <div class="status-current">
+      <div class="status-print"><span class="status-letter">${period.letter}</span> print</div>
+      <div class="status-time">${period.timeRange}</div>
+      <div class="status-price">@ ${priceAtTickIndex(state.cursor.tickIndex, state.startPrice).toFixed(2)}</div>
+    </div>`
+    : `
+    <div class="status-current status-edit">
+      <div class="status-print"><span class="status-letter">A</span> open</div>
+      <input
+        type="text"
+        class="start-price-input"
+        value="${state.startPrice.toFixed(2)}"
+        inputmode="decimal"
+        aria-label="Session open price"
+      />
+      <div class="status-hint">Enter to set open price</div>
+    </div>`;
 
   container.innerHTML = `
     <div class="session-progress">
@@ -27,20 +46,16 @@ export function renderSessionStatus(container, state) {
         <div class="progress-segments-v" aria-hidden="true">${segments}</div>
       </div>
     </div>
-    <div class="status-current">
-      <div class="status-print"><span class="status-letter">${period.letter}</span> print</div>
-      <div class="status-time">${period.timeRange}</div>
-      <div class="status-price">@ ${price}</div>
-    </div>
+    ${statusBlock}
     <div class="status-guide">
       <p><kbd>↑</kbd> <kbd>↓</kbd> price + print</p>
       <p><kbd>→</kbd> next period</p>
       <p><kbd>←</kbd> previous</p>
-      <p><kbd>Enter</kbd> full profile</p>
+      <p><kbd>Enter</kbd> show full profile</p>
       <p><kbd>Delete</kbd> erase</p>
       <p><kbd>R</kbd> reset</p>
       <p class="status-teach">Build one period at a time. Each letter marks where price traded in that 30-minute bracket.</p>
-      <p class="changelog-link"><a href="changelog.html">Changelog</a> · v1.0.0</p>
+      <p class="changelog-link"><a href="changelog.html">Changelog</a> · v1.1.0</p>
     </div>
   `;
 }

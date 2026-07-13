@@ -1,4 +1,4 @@
-import { createInitialState } from './state.js';
+import { createInitialState, applyStartPrice, hasPrints } from './state.js';
 import { computeAnalytics } from './profile/analytics.js';
 import { renderSplitView } from './render/split-view.js';
 import { renderFullProfile } from './render/full-profile.js';
@@ -12,14 +12,44 @@ const splitRoot = document.getElementById('split-view');
 const fullRoot = document.getElementById('full-profile');
 const statusRoot = document.getElementById('session-status');
 
+function bindStartPriceInput() {
+  const input = statusRoot.querySelector('.start-price-input');
+  if (!input) return;
+
+  input.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter') return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const result = applyStartPrice(state, input.value);
+    if (!result.ok) {
+      alert(result.error);
+      return;
+    }
+
+    render();
+  });
+
+  input.focus();
+  input.select();
+}
+
 function render() {
   applyLayout(shell, state);
   renderSplitView(splitRoot, state);
   renderSessionStatus(statusRoot, state);
 
-  if (state.fullProfileRevealed) {
+  if (!hasPrints(state)) {
+    bindStartPriceInput();
+  }
+
+  if (state.fullProfileRevealed && hasPrints(state)) {
     const analytics = computeAnalytics(state);
     renderFullProfile(fullRoot, state, analytics);
+  } else if (fullRoot) {
+    fullRoot.innerHTML = '';
+    fullRoot.classList.add('empty');
   }
 }
 

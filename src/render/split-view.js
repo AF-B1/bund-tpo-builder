@@ -37,7 +37,7 @@ export function renderSplitView(container, state) {
 
     const priceLabel = document.createElement('div');
     priceLabel.className = 'split-price' + (tickIndex === state.cursor.tickIndex ? ' cursor-price' : '');
-    priceLabel.textContent = priceAtTickIndex(tickIndex).toFixed(2);
+    priceLabel.textContent = priceAtTickIndex(tickIndex, state.startPrice).toFixed(2);
     table.appendChild(priceLabel);
 
     for (let p = 0; p < state.periods.length; p++) {

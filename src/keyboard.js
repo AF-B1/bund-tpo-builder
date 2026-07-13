@@ -1,7 +1,24 @@
-import { setCell, resetState } from './state.js';
+import { setCell, resetState, hasPrints } from './state.js';
 
 export function handleKeyDown(event, state, onChange) {
+  if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+    return;
+  }
+
   const key = event.key;
+
+  if (key === 'r' || key === 'R') {
+    event.preventDefault();
+    if (confirm('Reset session? All TPO prints will be cleared.')) {
+      resetState(state);
+      onChange();
+    }
+    return;
+  }
+
+  if (!hasPrints(state)) {
+    return;
+  }
 
   if (key === 'ArrowUp') {
     event.preventDefault();
@@ -41,6 +58,10 @@ export function handleKeyDown(event, state, onChange) {
   if (key === 'Backspace' || key === 'Delete') {
     event.preventDefault();
     setCell(state.grid, state.cursor.tickIndex, state.cursor.periodIndex, null);
+    if (!hasPrints(state)) {
+      state.lastPrint = null;
+      state.fullProfileRevealed = false;
+    }
     onChange();
     return;
   }
@@ -49,15 +70,6 @@ export function handleKeyDown(event, state, onChange) {
     event.preventDefault();
     if (!state.fullProfileRevealed) {
       state.fullProfileRevealed = true;
-      onChange();
-    }
-    return;
-  }
-
-  if (key === 'r' || key === 'R') {
-    event.preventDefault();
-    if (confirm('Reset session? All TPO prints will be cleared.')) {
-      resetState(state);
       onChange();
     }
   }

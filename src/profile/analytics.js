@@ -92,9 +92,9 @@ export function computeIBR(grid) {
   return { min, max };
 }
 
-export function computeClose(lastPrint) {
+export function computeClose(lastPrint, startPrice) {
   if (!lastPrint) return null;
-  return priceAtTickIndex(lastPrint.tickIndex);
+  return priceAtTickIndex(lastPrint.tickIndex, startPrice);
 }
 
 export function computeAnalytics(state) {
@@ -103,7 +103,7 @@ export function computeAnalytics(state) {
   const valueArea = computeValueArea(counts, pocIndex);
   const ibr = computeIBR(state.grid);
   const merged = mergeProfile(state.grid, state.periods.length);
-  const closePrice = computeClose(state.lastPrint);
+  const closePrice = computeClose(state.lastPrint, state.startPrice);
 
   return { counts, pocIndex, valueArea, ibr, merged, closePrice, closeTick: state.lastPrint?.tickIndex ?? null };
 }

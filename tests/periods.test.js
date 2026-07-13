@@ -24,12 +24,13 @@ describe('periods', () => {
 });
 
 describe('initial state', () => {
-  it('seeds cursor and A at 125.50', () => {
+  it('starts with cursor at open tick and empty grid', () => {
     const state = createInitialState();
     expect(state.cursor.tickIndex).toBe(0);
     expect(state.cursor.periodIndex).toBe(0);
-    expect(getCell(state.grid, 0, 0)).toBe('A');
-    expect(priceAtTickIndex(0)).toBe(125.5);
-    expect(priceAtTickIndex(1)).toBe(125.51);
+    expect(getCell(state.grid, 0, 0)).toBeNull();
+    expect(state.startPrice).toBe(125.5);
+    expect(priceAtTickIndex(0, state.startPrice)).toBe(125.5);
+    expect(priceAtTickIndex(1, state.startPrice)).toBe(125.51);
   });
 });

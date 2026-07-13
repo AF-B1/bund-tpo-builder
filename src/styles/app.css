@@ -209,6 +209,33 @@ body {
   color: #a000a0;
 }
 
+.status-edit .status-print {
+  margin-bottom: 6px;
+}
+
+.start-price-input {
+  width: 100%;
+  max-width: 108px;
+  padding: 4px 6px;
+  font-family: inherit;
+  font-size: 13px;
+  border: 1px solid #888;
+  border-radius: 3px;
+  background: #e8e8e8;
+  color: #111;
+}
+
+.start-price-input:focus {
+  outline: 1px solid #a000a0;
+  background: #f4f4f4;
+}
+
+.status-hint {
+  margin-top: 5px;
+  font-size: 9px;
+  color: #555;
+}
+
 /* ── Column 2: Split builder ────────────────────────────── */
 
 .split-panel {

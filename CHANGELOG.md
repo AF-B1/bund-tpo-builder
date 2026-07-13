@@ -2,6 +2,15 @@
 
 All notable changes to Bund TPO Builder.
 
+## [1.1.0] — 2026-07-13
+
+### Added
+- Custom session open price: type a price in column 1 when the grid is empty, press Enter to start building from that level (0.01 tick steps unchanged)
+
+### Changed
+- Fresh load and reset show a price input instead of auto-placing A at 125.50
+- Deleting all prints returns to the open-price input (keeps last chosen price as default)
+
 ## [1.0.0] — 2026-07-13
 
 First public release.
