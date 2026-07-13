@@ -239,7 +239,7 @@ body {
 }
 
 #app-shell.side-by-side #full-profile {
-  padding-left: 20px;
+  padding: 4px;
   overflow: visible;
 }
 
@@ -339,7 +339,7 @@ body {
 
 #full-profile {
   position: relative;
-  padding: 4px 4px 4px 20px;
+  padding: 4px;
   overflow: visible;
 }
 
@@ -348,17 +348,32 @@ body {
 }
 
 .full-profile-wrap {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 3px;
+}
+
+.full-profile-lane {
   position: relative;
-  display: inline-block;
-  padding-left: 4px;
+  flex-shrink: 0;
+  width: 12px;
+}
+
+.full-profile-lane-left {
+  width: 10px;
+}
+
+.full-profile-lane-right {
+  width: 10px;
 }
 
 .ibr-bar {
   position: absolute;
-  left: -18px;
-  width: 8px;
-  background: #e07020;
-  border: 1px solid #c05010;
+  left: 1px;
+  width: 7px;
+  background: #e85d04;
+  border: 1px solid #c44d00;
   border-radius: 1px;
   pointer-events: none;
   z-index: 2;
@@ -366,7 +381,7 @@ body {
 
 .close-marker {
   position: absolute;
-  left: -20px;
+  left: 0;
   width: 0;
   height: 0;
   border-top: 5px solid transparent;
@@ -678,23 +693,20 @@ function renderFullProfile(container, state, analytics) {
 
   const ticks = Object.keys(analytics.merged).map(Number).sort((a, b) => b - a);
   const maxTick = ticks[0];
+  const columnHeight = ticks.length * ROW_HEIGHT;
 
   const wrap = document.createElement('div');
   wrap.className = 'full-profile-wrap';
 
-  if (analytics.ibr) {
-    const ibr = document.createElement('div');
-    ibr.className = 'ibr-bar';
-    ibr.style.top = `${tickOffset(maxTick, analytics.ibr.max)}px`;
-    ibr.style.height = `${(analytics.ibr.max - analytics.ibr.min + 1) * ROW_HEIGHT}px`;
-    wrap.appendChild(ibr);
-  }
+  const leftLane = document.createElement('div');
+  leftLane.className = 'full-profile-lane full-profile-lane-left';
+  leftLane.style.height = `${columnHeight}px`;
 
   if (analytics.closeTick != null) {
     const close = document.createElement('div');
     close.className = 'close-marker';
     close.style.top = `${tickOffset(maxTick, analytics.closeTick) + 4}px`;
-    wrap.appendChild(close);
+    leftLane.appendChild(close);
   }
 
   const column = document.createElement('div');
@@ -715,7 +727,22 @@ function renderFullProfile(container, state, analytics) {
     column.appendChild(row);
   }
 
+  const rightLane = document.createElement('div');
+  rightLane.className = 'full-profile-lane full-profile-lane-right';
+  rightLane.style.height = `${columnHeight}px`;
+
+  if (analytics.ibr) {
+    const ibr = document.createElement('div');
+    ibr.className = 'ibr-bar';
+    ibr.title = 'Initial Balance (A + B)';
+    ibr.style.top = `${tickOffset(maxTick, analytics.ibr.max)}px`;
+    ibr.style.height = `${(analytics.ibr.max - analytics.ibr.min + 1) * ROW_HEIGHT}px`;
+    rightLane.appendChild(ibr);
+  }
+
+  wrap.appendChild(leftLane);
   wrap.appendChild(column);
+  wrap.appendChild(rightLane);
   container.appendChild(wrap);
 }
 
