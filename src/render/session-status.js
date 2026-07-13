@@ -12,7 +12,22 @@ export function renderSessionStatus(container, state) {
     return `<span class="${cls}" title="${p.label}">${p.letter}</span>`;
   }).join('');
 
-  const statusBlock = hasPrints(state)
+  const sessionStarted = hasPrints(state);
+
+  const guideBlock = sessionStarted
+    ? `
+      <p><kbd>↑</kbd> <kbd>↓</kbd> price + print</p>
+      <p><kbd>→</kbd> next period</p>
+      <p><kbd>←</kbd> previous</p>
+      <p><kbd>Enter</kbd> show full profile</p>
+      <p><kbd>Delete</kbd> erase</p>
+      <p><kbd>R</kbd> reset</p>
+      <p class="status-teach">Build one period at a time. Each letter marks where price traded in that 30-minute bracket.</p>`
+    : `
+      <p><kbd>Enter</kbd> set open price</p>
+      <p class="status-teach">Type a price with a decimal (e.g. 125.50), then press Enter to start period A.</p>`;
+
+  const statusBlock = sessionStarted
     ? `
     <div class="status-current">
       <div class="status-print"><span class="status-letter">${period.letter}</span> print</div>
@@ -48,14 +63,8 @@ export function renderSessionStatus(container, state) {
     </div>
     ${statusBlock}
     <div class="status-guide">
-      <p><kbd>↑</kbd> <kbd>↓</kbd> price + print</p>
-      <p><kbd>→</kbd> next period</p>
-      <p><kbd>←</kbd> previous</p>
-      <p><kbd>Enter</kbd> show full profile</p>
-      <p><kbd>Delete</kbd> erase</p>
-      <p><kbd>R</kbd> reset</p>
-      <p class="status-teach">Build one period at a time. Each letter marks where price traded in that 30-minute bracket.</p>
-      <p class="changelog-link"><a href="changelog.html">Changelog</a> · v1.1.0</p>
+      ${guideBlock}
+      <p class="changelog-link"><a href="changelog.html">Changelog</a> · v1.1.1</p>
     </div>
   `;
 }

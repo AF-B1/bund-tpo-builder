@@ -2,6 +2,11 @@
 
 All notable changes to Bund TPO Builder.
 
+## [1.1.1] — 2026-07-13
+
+### Fixed
+- Sidebar tutorial shows “Enter to set open price” while price input is visible; build shortcuts appear after session starts
+
 ## [1.1.0] — 2026-07-13
 
 ### Added
