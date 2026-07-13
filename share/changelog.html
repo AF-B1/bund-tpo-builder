@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bund TPO Builder — Changelog</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px 20px 40px;
+      font-family: Consolas, 'Courier New', monospace;
+      background: #c4c4c4;
+      color: #222;
+      font-size: 13px;
+      line-height: 1.5;
+      max-width: 520px;
+    }
+    h1 {
+      font-size: 16px;
+      margin: 0 0 4px;
+      color: #111;
+    }
+    .back {
+      display: inline-block;
+      margin-bottom: 20px;
+      font-size: 11px;
+      color: #444;
+    }
+    .back:hover { color: #111; }
+    .release {
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #999;
+    }
+    .release:last-child { border-bottom: none; }
+    .release-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .version {
+      font-size: 14px;
+      font-weight: bold;
+      color: #a000a0;
+    }
+    .date { font-size: 11px; color: #555; }
+    .summary { margin: 0 0 8px; color: #333; }
+    ul { margin: 0; padding-left: 18px; }
+    li { margin-bottom: 4px; color: #444; }
+    h2 { font-size: 11px; margin: 10px 0 4px; color: #333; text-transform: uppercase; letter-spacing: 0.03em; }
+  </style>
+</head>
+<body>
+  <a class="back" href="index.html">← Back to app</a>
+  <h1>Bund TPO Builder</h1>
+  <p style="margin:0 0 20px;font-size:11px;color:#555;">Release history</p>
+
+  <article class="release">
+    <div class="release-header">
+      <span class="version">v1.0.0</span>
+      <span class="date">13 Jul 2026</span>
+    </div>
+    <p class="summary">First public release — teaching tool for keyboard-built Market Profile / TPO sessions.</p>
+    <h2>Added</h2>
+    <ul>
+      <li>Keyboard TPO builder for Bund futures (125.50, 0.01 tick)</li>
+      <li>Split view: periods A–S, 07:00–16:30</li>
+      <li>Full profile: POC, 68.8% value area, Initial Balance, close</li>
+      <li>Three-column layout with vertical session progress</li>
+      <li>Live print, time, and price status + teaching guide</li>
+    </ul>
+    <h2>Layout</h2>
+    <ul>
+      <li>Orange IB bar (A+B) left of letters</li>
+      <li>Red close triangle right of letters, pointing in</li>
+      <li>POC: magenta row, white letters</li>
+    </ul>
+    <h2>Delivery</h2>
+    <ul>
+      <li>Live link via GitHub Pages</li>
+      <li>Standalone zip for local Windows use</li>
+    </ul>
+  </article>
+</body>
+</html>
