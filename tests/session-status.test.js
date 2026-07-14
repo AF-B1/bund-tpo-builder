@@ -30,6 +30,6 @@ describe('renderSessionStatus tutorial hints', () => {
     expect(html).toContain('<kbd>X</kbd>');
     expect(html).not.toContain('start-price-input');
     expect(html).not.toContain('set open price');
-    expect(html).toContain('v1.2.1');
+    expect(html).toContain('v1.2.2');
   });
 });

@@ -1,4 +1,13 @@
 import { ROW_HEIGHT } from '../config.js';
+import { getCell } from '../state.js';
+
+export function mergedLetterParts(tick, letters, hasOpenPrintAtTick) {
+  if (!letters) return [];
+  if (tick === 0 && hasOpenPrintAtTick) {
+    return [...letters].map((ch, index) => ({ ch, open: index === 0 }));
+  }
+  return [{ ch: letters, open: false }];
+}
 
 export function renderFullProfile(container, state, analytics) {
   container.innerHTML = '';
@@ -13,6 +22,7 @@ export function renderFullProfile(container, state, analytics) {
   const ticks = Object.keys(analytics.merged).map(Number).sort((a, b) => b - a);
   const maxTick = ticks[0];
   const columnHeight = ticks.length * ROW_HEIGHT;
+  const hasOpenPrintAtTick = getCell(state.grid, 0, 0) === 'A';
 
   const wrap = document.createElement('div');
   wrap.className = 'full-profile-wrap';
@@ -43,7 +53,20 @@ export function renderFullProfile(container, state, analytics) {
 
     const cell = document.createElement('span');
     cell.className = 'full-letter' + (inVA && !isPoc ? ' in-va' : '');
-    cell.textContent = analytics.merged[tick];
+
+    const parts = mergedLetterParts(tick, analytics.merged[tick], hasOpenPrintAtTick);
+    if (parts.length === 1 && !parts[0].open) {
+      cell.textContent = parts[0].ch;
+    } else {
+      for (const part of parts) {
+        const span = document.createElement('span');
+        span.className = 'full-letter-char' + (part.open ? ' open-print' : '');
+        if (inVA && !isPoc && !part.open) span.classList.add('in-va');
+        span.textContent = part.ch;
+        cell.appendChild(span);
+      }
+    }
+
     row.appendChild(cell);
     column.appendChild(row);
   }

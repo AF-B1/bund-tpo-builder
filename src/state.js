@@ -57,6 +57,16 @@ export function clearPeriodColumn(state, periodIndex) {
   recomputeLastPrint(state);
 }
 
+export function restoreCursorAfterPeriodClear(state) {
+  if (state.periodEntryCursor) {
+    state.cursor = { ...state.periodEntryCursor };
+  }
+}
+
+export function snapshotPeriodEntry(state) {
+  state.periodEntryCursor = { ...state.cursor };
+}
+
 export function parseStartPrice(raw) {
   const trimmed = String(raw).trim();
   if (!/^\d+\.\d+$/.test(trimmed)) {
@@ -80,6 +90,7 @@ export function applyStartPrice(state, raw) {
   state.cursor = { periodIndex: 0, tickIndex: 0 };
   state.visibleTickStart = -Math.floor(VISIBLE_ROWS / 2);
   state.fullProfileRevealed = false;
+  state.periodEntryCursor = null;
   setCell(state.grid, 0, 0, 'A');
   state.lastPrint = { periodIndex: 0, tickIndex: 0 };
 
@@ -94,6 +105,7 @@ export function createInitialState() {
     startPrice: START_PRICE,
     fullProfileRevealed: false,
     visibleTickStart: -Math.floor(VISIBLE_ROWS / 2),
+    periodEntryCursor: null,
     periods: generatePeriods(),
   };
 }

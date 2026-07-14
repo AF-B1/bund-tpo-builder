@@ -1,4 +1,11 @@
-import { setCell, resetState, hasPrints, clearPeriodColumn } from './state.js';
+import {
+  setCell,
+  resetState,
+  hasPrints,
+  clearPeriodColumn,
+  restoreCursorAfterPeriodClear,
+  snapshotPeriodEntry,
+} from './state.js';
 import { setOpenPriceTrigger } from './onboarding.js';
 
 export function handleKeyDown(event, state, onChange) {
@@ -41,6 +48,7 @@ export function handleKeyDown(event, state, onChange) {
   if (key === 'ArrowRight') {
     event.preventDefault();
     if (state.cursor.periodIndex < state.periods.length - 1) {
+      snapshotPeriodEntry(state);
       state.cursor.periodIndex += 1;
       printAtCursor(state);
       onChange();
@@ -63,6 +71,8 @@ export function handleKeyDown(event, state, onChange) {
     if (!hasPrints(state)) {
       state.fullProfileRevealed = false;
       setOpenPriceTrigger('reset');
+    } else {
+      restoreCursorAfterPeriodClear(state);
     }
     onChange();
     return;

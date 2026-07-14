@@ -8,6 +8,8 @@ import {
   isOpenPrint,
   getCell,
   hasPrints,
+  snapshotPeriodEntry,
+  restoreCursorAfterPeriodClear,
 } from '../src/state.js';
 
 describe('isOpenPrint', () => {
@@ -46,6 +48,30 @@ describe('clearPeriodColumn', () => {
 
     expect(hasPrints(state)).toBe(false);
     expect(state.lastPrint).toBeNull();
+  });
+});
+
+describe('cursor restore after clear period', () => {
+  it('returns cursor to the position before advancing into the cleared period', () => {
+    const state = createInitialState();
+    applyStartPrice(state, '125.50');
+    setCell(state.grid, -18, 0, 'A');
+    state.cursor = { periodIndex: 0, tickIndex: -18 };
+    snapshotPeriodEntry(state);
+    state.cursor = { periodIndex: 1, tickIndex: -18 };
+    setCell(state.grid, -18, 1, 'B');
+    setCell(state.grid, -17, 1, 'B');
+    snapshotPeriodEntry(state);
+    state.cursor = { periodIndex: 2, tickIndex: -17 };
+    setCell(state.grid, -17, 2, 'C');
+    setCell(state.grid, -16, 2, 'C');
+
+    clearPeriodColumn(state, 2);
+    restoreCursorAfterPeriodClear(state);
+
+    expect(state.cursor).toEqual({ periodIndex: 1, tickIndex: -18 });
+    expect(getCell(state.grid, -18, 1)).toBe('B');
+    expect(getCell(state.grid, -17, 2)).toBeNull();
   });
 });
 
