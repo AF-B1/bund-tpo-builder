@@ -2,6 +2,16 @@
 
 All notable changes to Bund TPO Builder.
 
+## [1.2.1] — 2026-07-14
+
+### Added
+- Light-green highlight on the session open print (first `A` at open price)
+- `X` clears all letters in the current period column — redo one bracket without full reset
+
+### Changed
+- Sidebar guide documents `X` clear period vs `Delete` single cell
+- Rebuilt standalone share bundle (`share/Bund-TPO-Builder.html`)
+
 ## [1.2.0] — 2026-07-14
 
 ### Added
@@ -58,6 +68,7 @@ First public release.
 - GitHub Pages live link
 - Standalone zip for local use (`START HERE.bat`)
 
+[1.2.1]: https://github.com/AF-B1/bund-tpo-builder/releases/tag/v1.2.1
 [1.2.0]: https://github.com/AF-B1/bund-tpo-builder/releases/tag/v1.2.0
 [1.1.2]: https://github.com/AF-B1/bund-tpo-builder/releases/tag/v1.1.2
 [1.1.1]: https://github.com/AF-B1/bund-tpo-builder/releases/tag/v1.1.1

@@ -20,9 +20,10 @@ export function renderSessionStatus(container, state) {
       <p><kbd>→</kbd> next period</p>
       <p><kbd>←</kbd> previous</p>
       <p><kbd>Enter</kbd> show full profile</p>
-      <p><kbd>Delete</kbd> erase</p>
-      <p><kbd>R</kbd> reset</p>
-      <p class="status-teach">Build one period at a time. Each letter marks where price traded in that 30-minute bracket.</p>`
+      <p><kbd>Delete</kbd> erase cell</p>
+      <p><kbd>X</kbd> clear current period</p>
+      <p><kbd>R</kbd> reset session</p>
+      <p class="status-teach">Build one period at a time. <kbd>X</kbd> redoes this bracket without resetting the whole session.</p>`
     : '';
 
   const statusBlock = sessionStarted
@@ -38,7 +39,7 @@ export function renderSessionStatus(container, state) {
     ? `
     <div class="status-guide">
       ${guideBlock}
-      <p class="changelog-link"><a href="changelog.html">Changelog</a> · v1.2.0</p>
+      <p class="changelog-link"><a href="changelog.html">Changelog</a> · v1.2.1</p>
     </div>`
     : '';
 

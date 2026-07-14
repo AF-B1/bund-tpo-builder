@@ -25,6 +25,38 @@ export function hasPrints(state) {
   return Object.keys(state.grid).length > 0;
 }
 
+export function isOpenPrint(tickIndex, periodIndex, letter) {
+  return tickIndex === 0 && periodIndex === 0 && letter === 'A';
+}
+
+export function recomputeLastPrint(state) {
+  let best = null;
+
+  for (const key of Object.keys(state.grid)) {
+    const [tick, period] = key.split(',').map(Number);
+    if (
+      !best
+      || period > best.periodIndex
+      || (period === best.periodIndex && tick > best.tickIndex)
+    ) {
+      best = { periodIndex: period, tickIndex: tick };
+    }
+  }
+
+  state.lastPrint = best;
+}
+
+export function clearPeriodColumn(state, periodIndex) {
+  for (const key of Object.keys(state.grid)) {
+    const [, period] = key.split(',').map(Number);
+    if (period === periodIndex) {
+      delete state.grid[key];
+    }
+  }
+
+  recomputeLastPrint(state);
+}
+
 export function parseStartPrice(raw) {
   const trimmed = String(raw).trim();
   if (!/^\d+\.\d+$/.test(trimmed)) {

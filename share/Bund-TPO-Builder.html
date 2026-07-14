@@ -470,6 +470,13 @@ body {
   color: #c000c0;
 }
 
+.split-cell.open-print {
+  background: #8fd694;
+  color: #0a4d0f;
+  font-weight: bold;
+  box-shadow: inset 0 0 0 1px #5cb863;
+}
+
 .split-cell.active-cursor {
   outline: 1px solid #333;
   outline-offset: -1px;
@@ -642,6 +649,38 @@ function hasPrints(state) {
   return Object.keys(state.grid).length > 0;
 }
 
+function isOpenPrint(tickIndex, periodIndex, letter) {
+  return tickIndex === 0 && periodIndex === 0 && letter === 'A';
+}
+
+function recomputeLastPrint(state) {
+  let best = null;
+
+  for (const key of Object.keys(state.grid)) {
+    const [tick, period] = key.split(',').map(Number);
+    if (
+      !best
+      || period > best.periodIndex
+      || (period === best.periodIndex && tick > best.tickIndex)
+    ) {
+      best = { periodIndex: period, tickIndex: tick };
+    }
+  }
+
+  state.lastPrint = best;
+}
+
+function clearPeriodColumn(state, periodIndex) {
+  for (const key of Object.keys(state.grid)) {
+    const [, period] = key.split(',').map(Number);
+    if (period === periodIndex) {
+      delete state.grid[key];
+    }
+  }
+
+  recomputeLastPrint(state);
+}
+
 function parseStartPrice(raw) {
   const trimmed = String(raw).trim();
   if (!/^\d+\.\d+$/.test(trimmed)) {
@@ -797,6 +836,18 @@ function computeAnalytics(state) {
   return { counts, pocIndex, valueArea, ibr, merged, closePrice, closeTick: state.lastPrint?.tickIndex ?? null };
 }
 
+function splitCellClasses(tickIndex, periodIndex, letter) {
+  const classes = ['split-cell'];
+  if (letter) {
+    if (isOpenPrint(tickIndex, periodIndex, letter)) {
+      classes.push('open-print');
+    } else if (letter === 'A' || letter === 'B') {
+      classes.push('early-letter');
+    }
+  }
+  return classes;
+}
+
 function ensureVisibleWindow(state) {
   const cursorOffset = state.cursor.tickIndex - state.visibleTickStart;
 
@@ -839,10 +890,9 @@ function renderSplitView(container, state) {
     for (let p = 0; p < state.periods.length; p++) {
       const letter = getCell(state.grid, tickIndex, p);
       const cell = document.createElement('div');
-      cell.className = 'split-cell';
+      cell.className = splitCellClasses(tickIndex, p, letter).join(' ');
       if (letter) {
         cell.textContent = letter;
-        if (letter === 'A' || letter === 'B') cell.classList.add('early-letter');
       }
       if (tickIndex === state.cursor.tickIndex && p === state.cursor.periodIndex) {
         cell.classList.add('active-cursor');
@@ -954,9 +1004,10 @@ function renderSessionStatus(container, state) {
       <p><kbd>â†’</kbd> next period</p>
       <p><kbd>â†</kbd> previous</p>
       <p><kbd>Enter</kbd> show full profile</p>
-      <p><kbd>Delete</kbd> erase</p>
-      <p><kbd>R</kbd> reset</p>
-      <p class="status-teach">Build one period at a time. Each letter marks where price traded in that 30-minute bracket.</p>`
+      <p><kbd>Delete</kbd> erase cell</p>
+      <p><kbd>X</kbd> clear current period</p>
+      <p><kbd>R</kbd> reset session</p>
+      <p class="status-teach">Build one period at a time. <kbd>X</kbd> redoes this bracket without resetting the whole session.</p>`
     : '';
 
   const statusBlock = sessionStarted
@@ -972,7 +1023,7 @@ function renderSessionStatus(container, state) {
     ? `
     <div class="status-guide">
       ${guideBlock}
-      <p class="changelog-link"><a href="changelog.html">Changelog</a> Â· v1.2.0</p>
+      <p class="changelog-link"><a href="changelog.html">Changelog</a> Â· v1.2.1</p>
     </div>`
     : '';
 
@@ -1154,6 +1205,17 @@ function handleKeyDown(event, state, onChange) {
       state.cursor.periodIndex -= 1;
       onChange();
     }
+    return;
+  }
+
+  if (key === 'x' || key === 'X') {
+    event.preventDefault();
+    clearPeriodColumn(state, state.cursor.periodIndex);
+    if (!hasPrints(state)) {
+      state.fullProfileRevealed = false;
+      setOpenPriceTrigger('reset');
+    }
+    onChange();
     return;
   }
 

@@ -1,5 +1,17 @@
 import { VISIBLE_ROWS, SCROLL_EDGE } from '../config.js';
-import { priceAtTickIndex, getCell } from '../state.js';
+import { priceAtTickIndex, getCell, isOpenPrint } from '../state.js';
+
+export function splitCellClasses(tickIndex, periodIndex, letter) {
+  const classes = ['split-cell'];
+  if (letter) {
+    if (isOpenPrint(tickIndex, periodIndex, letter)) {
+      classes.push('open-print');
+    } else if (letter === 'A' || letter === 'B') {
+      classes.push('early-letter');
+    }
+  }
+  return classes;
+}
 
 export function ensureVisibleWindow(state) {
   const cursorOffset = state.cursor.tickIndex - state.visibleTickStart;
@@ -43,10 +55,9 @@ export function renderSplitView(container, state) {
     for (let p = 0; p < state.periods.length; p++) {
       const letter = getCell(state.grid, tickIndex, p);
       const cell = document.createElement('div');
-      cell.className = 'split-cell';
+      cell.className = splitCellClasses(tickIndex, p, letter).join(' ');
       if (letter) {
         cell.textContent = letter;
-        if (letter === 'A' || letter === 'B') cell.classList.add('early-letter');
       }
       if (tickIndex === state.cursor.tickIndex && p === state.cursor.periodIndex) {
         cell.classList.add('active-cursor');

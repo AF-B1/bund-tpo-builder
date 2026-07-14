@@ -26,8 +26,10 @@ describe('renderSessionStatus tutorial hints', () => {
 
     expect(html).toContain('show full profile');
     expect(html).toContain('price + print');
+    expect(html).toContain('clear current period');
+    expect(html).toContain('<kbd>X</kbd>');
     expect(html).not.toContain('start-price-input');
     expect(html).not.toContain('set open price');
-    expect(html).toContain('v1.2.0');
+    expect(html).toContain('v1.2.1');
   });
 });

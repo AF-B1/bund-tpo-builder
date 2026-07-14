@@ -1,4 +1,4 @@
-import { setCell, resetState, hasPrints } from './state.js';
+import { setCell, resetState, hasPrints, clearPeriodColumn } from './state.js';
 import { setOpenPriceTrigger } from './onboarding.js';
 
 export function handleKeyDown(event, state, onChange) {
@@ -54,6 +54,17 @@ export function handleKeyDown(event, state, onChange) {
       state.cursor.periodIndex -= 1;
       onChange();
     }
+    return;
+  }
+
+  if (key === 'x' || key === 'X') {
+    event.preventDefault();
+    clearPeriodColumn(state, state.cursor.periodIndex);
+    if (!hasPrints(state)) {
+      state.fullProfileRevealed = false;
+      setOpenPriceTrigger('reset');
+    }
+    onChange();
     return;
   }
 
