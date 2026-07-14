@@ -2,6 +2,14 @@
 
 All notable changes to Bund TPO Builder.
 
+## [1.2.3] — 2026-07-14
+
+### Fixed
+- Full profile (column 3): session open `A` uses green **text only** — no green background fill
+
+### Changed
+- Rebuilt standalone share bundle (`share/Bund-TPO-Builder.html`)
+
 ## [1.2.2] — 2026-07-14
 
 ### Added
@@ -79,6 +87,7 @@ First public release.
 - GitHub Pages live link
 - Standalone zip for local use (`START HERE.bat`)
 
+[1.2.3]: https://github.com/AF-B1/bund-tpo-builder/releases/tag/v1.2.3
 [1.2.2]: https://github.com/AF-B1/bund-tpo-builder/releases/tag/v1.2.2
 [1.2.1]: https://github.com/AF-B1/bund-tpo-builder/releases/tag/v1.2.1
 [1.2.0]: https://github.com/AF-B1/bund-tpo-builder/releases/tag/v1.2.0

@@ -567,14 +567,17 @@ body {
   border-radius: 1px;
 }
 
-.full-letter-char.open-print,
-.full-row.is-poc .full-letter-char.open-print {
-  background: #8fd694;
-  color: #0a4d0f;
+.full-letter-char.open-print {
+  color: #2da835;
   font-weight: bold;
-  padding: 0 2px;
-  border-radius: 1px;
-  box-shadow: inset 0 0 0 1px #5cb863;
+  background: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+.full-row.is-poc .full-letter-char.open-print {
+  color: #7dff85;
+  background: transparent;
 }
   </style>
 </head>
@@ -1067,7 +1070,7 @@ function renderSessionStatus(container, state) {
     ? `
     <div class="status-guide">
       ${guideBlock}
-      <p class="changelog-link"><a href="changelog.html">Changelog</a> Â· v1.2.2</p>
+      <p class="changelog-link"><a href="changelog.html">Changelog</a> Â· v1.2.3</p>
     </div>`
     : '';
 
