@@ -23,9 +23,7 @@ export function renderSessionStatus(container, state) {
       <p><kbd>Delete</kbd> erase</p>
       <p><kbd>R</kbd> reset</p>
       <p class="status-teach">Build one period at a time. Each letter marks where price traded in that 30-minute bracket.</p>`
-    : `
-      <p><kbd>Enter</kbd> set open price</p>
-      <p class="status-teach">Type a price with a decimal (e.g. 125.50), then press Enter to start period A.</p>`;
+    : '';
 
   const statusBlock = sessionStarted
     ? `
@@ -34,18 +32,15 @@ export function renderSessionStatus(container, state) {
       <div class="status-time">${period.timeRange}</div>
       <div class="status-price">@ ${priceAtTickIndex(state.cursor.tickIndex, state.startPrice).toFixed(2)}</div>
     </div>`
-    : `
-    <div class="status-current status-edit">
-      <div class="status-print"><span class="status-letter">A</span> open</div>
-      <input
-        type="text"
-        class="start-price-input"
-        value="${state.startPrice.toFixed(2)}"
-        inputmode="decimal"
-        aria-label="Session open price"
-      />
-      <div class="status-hint">Enter to set open price</div>
-    </div>`;
+    : '';
+
+  const guideSection = sessionStarted
+    ? `
+    <div class="status-guide">
+      ${guideBlock}
+      <p class="changelog-link"><a href="changelog.html">Changelog</a> · v1.2.0</p>
+    </div>`
+    : '';
 
   container.innerHTML = `
     <div class="session-progress">
@@ -62,9 +57,6 @@ export function renderSessionStatus(container, state) {
       </div>
     </div>
     ${statusBlock}
-    <div class="status-guide">
-      ${guideBlock}
-      <p class="changelog-link"><a href="changelog.html">Changelog</a> · v1.1.2</p>
-    </div>
+    ${guideSection}
   `;
 }

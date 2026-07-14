@@ -18,6 +18,8 @@ $jsFiles = @(
     'src\render\full-profile.js',
     'src\render\layout.js',
     'src\render\session-status.js',
+    'src\onboarding.js',
+    'src\render\onboarding-modal.js',
     'src\keyboard.js',
     'src\main.js'
 )
@@ -48,6 +50,7 @@ $css
         <div id="full-profile"></div>
       </section>
     </div>
+    <div id="onboarding-modal" hidden></div>
   </div>
   <script>
 $js

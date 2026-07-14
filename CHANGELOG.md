@@ -2,6 +2,16 @@
 
 All notable changes to Bund TPO Builder.
 
+## [1.2.0] — 2026-07-14
+
+### Added
+- Onboarding modal on load, reset, and delete-all: welcome message on first visit, open-price entry, inline validation
+- Sidebar shows session progress only until the first print; build shortcuts appear after open price is set
+
+### Changed
+- Open price input moved from sidebar to modal; reset shows a minimal “set open price” prompt
+- Rebuilt standalone share bundle (`share/Bund-TPO-Builder.html`)
+
 ## [1.1.2] — 2026-07-13
 
 ### Added
@@ -48,6 +58,7 @@ First public release.
 - GitHub Pages live link
 - Standalone zip for local use (`START HERE.bat`)
 
+[1.2.0]: https://github.com/AF-B1/bund-tpo-builder/releases/tag/v1.2.0
 [1.1.2]: https://github.com/AF-B1/bund-tpo-builder/releases/tag/v1.1.2
 [1.1.1]: https://github.com/AF-B1/bund-tpo-builder/releases/tag/v1.1.1
 [1.1.0]: https://github.com/AF-B1/bund-tpo-builder/releases/tag/v1.1.0

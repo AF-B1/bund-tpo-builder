@@ -24,6 +24,103 @@ body {
   height: 100vh;
   width: 100vw;
   background: #b8b8b8;
+  position: relative;
+}
+
+#onboarding-modal[hidden] {
+  display: none;
+}
+
+#onboarding-modal:not([hidden]) {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+}
+
+.onboarding-backdrop {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 16px;
+}
+
+.onboarding-dialog {
+  width: 100%;
+  max-width: 420px;
+  padding: 18px 20px 20px;
+  border: 1px solid #888;
+  border-radius: 4px;
+  background: #d8d8d8;
+  color: #222;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.onboarding-title {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: bold;
+  color: #111;
+}
+
+.onboarding-welcome {
+  margin: 0 0 14px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #333;
+}
+
+.onboarding-field {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.onboarding-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 11px;
+  color: #444;
+}
+
+.onboarding-hints {
+  margin-top: 12px;
+}
+
+.onboarding-hints p {
+  margin: 0 0 6px;
+  font-size: 11px;
+}
+
+.onboarding-teach {
+  margin: 0 0 8px;
+  font-size: 10px;
+  color: #555;
+  font-style: italic;
+  line-height: 1.35;
+}
+
+.onboarding-error {
+  margin: 6px 0 0;
+  font-size: 10px;
+  color: #a00000;
+}
+
+.onboarding-dialog .start-price-input {
+  max-width: none;
+  width: 100%;
+}
+
+.onboarding-dialog kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  border: 1px solid #888;
+  border-radius: 3px;
+  background: #c8c8c8;
+  font-family: inherit;
+  font-size: 10px;
+  color: #222;
 }
 
 .workspace {
@@ -475,6 +572,7 @@ body {
         <div id="full-profile"></div>
       </section>
     </div>
+    <div id="onboarding-modal" hidden></div>
   </div>
   <script>
 const START_PRICE = 125.5;
@@ -859,9 +957,7 @@ function renderSessionStatus(container, state) {
       <p><kbd>Delete</kbd> erase</p>
       <p><kbd>R</kbd> reset</p>
       <p class="status-teach">Build one period at a time. Each letter marks where price traded in that 30-minute bracket.</p>`
-    : `
-      <p><kbd>Enter</kbd> set open price</p>
-      <p class="status-teach">Type a price with a decimal (e.g. 125.50), then press Enter to start period A.</p>`;
+    : '';
 
   const statusBlock = sessionStarted
     ? `
@@ -870,18 +966,15 @@ function renderSessionStatus(container, state) {
       <div class="status-time">${period.timeRange}</div>
       <div class="status-price">@ ${priceAtTickIndex(state.cursor.tickIndex, state.startPrice).toFixed(2)}</div>
     </div>`
-    : `
-    <div class="status-current status-edit">
-      <div class="status-print"><span class="status-letter">A</span> open</div>
-      <input
-        type="text"
-        class="start-price-input"
-        value="${state.startPrice.toFixed(2)}"
-        inputmode="decimal"
-        aria-label="Session open price"
-      />
-      <div class="status-hint">Enter to set open price</div>
-    </div>`;
+    : '';
+
+  const guideSection = sessionStarted
+    ? `
+    <div class="status-guide">
+      ${guideBlock}
+      <p class="changelog-link"><a href="changelog.html">Changelog</a> Â· v1.2.0</p>
+    </div>`
+    : '';
 
   container.innerHTML = `
     <div class="session-progress">
@@ -898,9 +991,112 @@ function renderSessionStatus(container, state) {
       </div>
     </div>
     ${statusBlock}
-    <div class="status-guide">
-      ${guideBlock}
-      <p class="changelog-link"><a href="changelog.html">Changelog</a> Â· v1.1.2</p>
+    ${guideSection}
+  `;
+}
+
+const WELCOME_KEY = 'bund-tpo-builder.welcomeSeen';
+
+let openPriceTrigger = 'load';
+
+function getOpenPriceTrigger() {
+  return openPriceTrigger;
+}
+
+function setOpenPriceTrigger(trigger) {
+  openPriceTrigger = trigger;
+}
+
+function isWelcomeSeen() {
+  try {
+    return localStorage.getItem(WELCOME_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function markWelcomeSeen() {
+  try {
+    localStorage.setItem(WELCOME_KEY, '1');
+  } catch {
+    // private mode â€” ignore
+  }
+}
+
+function computeModalMode(hasPrints) {
+  if (hasPrints) return null;
+  if (openPriceTrigger === 'reset') return 'reset';
+  if (!isWelcomeSeen()) return 'welcome';
+  return 'open';
+}
+
+function renderOnboardingModal(container, { mode, startPrice, error }) {
+  if (!mode) {
+    container.hidden = true;
+    container.innerHTML = '';
+    return;
+  }
+
+  const price = Number(startPrice).toFixed(2);
+  const errorBlock = error
+    ? `<p class="onboarding-error" role="alert">${error}</p>`
+    : '';
+
+  let title = 'Set open price';
+  let body = '';
+
+  if (mode === 'welcome') {
+    title = 'Welcome to Bund TPO Builder';
+    body = `
+      <p class="onboarding-welcome">
+        This teaching tool helps you see how a session develops as you build it letter by letter.
+        Entering each print yourself gives you a kinesthetic feel for how the day unfolds â€”
+        sharper questions and better expectations follow.
+      </p>`;
+  } else if (mode === 'open') {
+    title = 'Set session open price';
+    body = `
+      <div class="onboarding-hints">
+        <p><kbd>Enter</kbd> set open price</p>
+        <p class="onboarding-teach">Type a price with a decimal (e.g. 125.50), then press Enter to start period A.</p>
+      </div>`;
+  } else {
+    body = `
+      <p class="onboarding-teach">Press Enter to start period A at this price.</p>`;
+  }
+
+  const hintsAfterInput = mode === 'welcome'
+    ? `
+      <div class="onboarding-hints">
+        <p><kbd>Enter</kbd> set open price</p>
+        <p class="onboarding-teach">Type a price with a decimal (e.g. 125.50), then press Enter to start period A.</p>
+      </div>`
+    : '';
+
+  container.hidden = false;
+  container.innerHTML = `
+    <div class="onboarding-backdrop">
+      <div
+        class="onboarding-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="onboarding-title"
+      >
+        <h2 id="onboarding-title" class="onboarding-title">${title}</h2>
+        ${body}
+        <label class="onboarding-field">
+          <span class="onboarding-label">Open price</span>
+          <input
+            type="text"
+            class="start-price-input"
+            value="${price}"
+            inputmode="decimal"
+            aria-label="Session open price"
+          />
+        </label>
+        ${errorBlock}
+        ${hintsAfterInput}
+      </div>
     </div>
   `;
 }
@@ -916,6 +1112,7 @@ function handleKeyDown(event, state, onChange) {
     event.preventDefault();
     if (confirm('Reset session? All TPO prints will be cleared.')) {
       resetState(state);
+      setOpenPriceTrigger('reset');
       onChange();
     }
     return;
@@ -966,6 +1163,7 @@ function handleKeyDown(event, state, onChange) {
     if (!hasPrints(state)) {
       state.lastPrint = null;
       state.fullProfileRevealed = false;
+      setOpenPriceTrigger('reset');
     }
     onChange();
     return;
@@ -991,9 +1189,12 @@ const shell = document.getElementById('app-shell');
 const splitRoot = document.getElementById('split-view');
 const fullRoot = document.getElementById('full-profile');
 const statusRoot = document.getElementById('session-status');
+const modalRoot = document.getElementById('onboarding-modal');
+
+let lastPriceError = null;
 
 function bindStartPriceInput() {
-  const input = statusRoot.querySelector('.start-price-input');
+  const input = modalRoot.querySelector('.start-price-input');
   if (!input || input.dataset.bound === 'true') return;
 
   input.dataset.bound = 'true';
@@ -1005,10 +1206,14 @@ function bindStartPriceInput() {
 
     const result = applyStartPrice(state, input.value);
     if (!result.ok) {
-      alert(result.error);
+      lastPriceError = result.error;
+      render();
       return;
     }
 
+    lastPriceError = null;
+    markWelcomeSeen();
+    setOpenPriceTrigger('load');
     render();
   });
 
@@ -1021,8 +1226,17 @@ function render() {
   renderSplitView(splitRoot, state);
   renderSessionStatus(statusRoot, state);
 
+  const modalMode = computeModalMode(hasPrints(state));
+  renderOnboardingModal(modalRoot, {
+    mode: modalMode,
+    startPrice: state.startPrice,
+    error: lastPriceError,
+  });
+
   if (!hasPrints(state)) {
     bindStartPriceInput();
+  } else {
+    lastPriceError = null;
   }
 
   if (state.fullProfileRevealed && hasPrints(state)) {

@@ -9,11 +9,12 @@ function renderInto(state) {
 }
 
 describe('renderSessionStatus tutorial hints', () => {
-  it('shows open-price hints when grid is empty', () => {
+  it('shows progress only when grid is empty (modal owns open price)', () => {
     const html = renderInto(createInitialState());
 
-    expect(html).toContain('set open price');
-    expect(html).toContain('start-price-input');
+    expect(html).toContain('session-progress');
+    expect(html).not.toContain('start-price-input');
+    expect(html).not.toContain('set open price');
     expect(html).not.toContain('show full profile');
     expect(html).not.toMatch(/<kbd>↑<\/kbd>/);
   });
@@ -27,5 +28,6 @@ describe('renderSessionStatus tutorial hints', () => {
     expect(html).toContain('price + print');
     expect(html).not.toContain('start-price-input');
     expect(html).not.toContain('set open price');
+    expect(html).toContain('v1.2.0');
   });
 });
