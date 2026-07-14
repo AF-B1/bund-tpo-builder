@@ -1,4 +1,4 @@
-import { createInitialState, applyStartPrice, hasPrints } from './state.js';
+import { createInitialState, applyStartPrice, hasPrints, switchMarket } from './state.js';
 import { computeAnalytics } from './profile/analytics.js';
 import { renderSplitView } from './render/split-view.js';
 import { renderFullProfile } from './render/full-profile.js';
@@ -49,15 +49,32 @@ function bindStartPriceInput() {
   input.select();
 }
 
+function bindMarketSelect() {
+  const select = statusRoot.querySelector('.market-select');
+  if (!select || select.dataset.bound === 'true') return;
+
+  select.dataset.bound = 'true';
+  select.addEventListener('change', () => {
+    const result = switchMarket(state, select.value);
+    if (!result.changed) return;
+
+    lastPriceError = null;
+    setOpenPriceTrigger('market-switch');
+    render();
+  });
+}
+
 function render() {
   applyLayout(shell, state);
   renderSplitView(splitRoot, state);
   renderSessionStatus(statusRoot, state);
+  bindMarketSelect();
 
   const modalMode = computeModalMode(hasPrints(state));
   renderOnboardingModal(modalRoot, {
     mode: modalMode,
     startPrice: state.startPrice,
+    marketId: state.marketId,
     error: lastPriceError,
   });
 

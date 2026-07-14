@@ -13,7 +13,7 @@ Teaching tool for keyboard-built Market Profile / TPO sessions (Bund futures).
 
 - **Live:** https://af-b1.github.io/bund-tpo-builder/
 - **GitHub:** https://github.com/AF-B1/bund-tpo-builder
-- **Release:** v1.2.3
+- **Release:** v1.2.4
 
 ## Commands
 

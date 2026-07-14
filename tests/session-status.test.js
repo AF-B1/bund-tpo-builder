@@ -9,6 +9,14 @@ function renderInto(state) {
 }
 
 describe('renderSessionStatus tutorial hints', () => {
+  it('shows market selector above session progress', () => {
+    const html = renderInto(createInitialState());
+
+    expect(html).toContain('market-select');
+    expect(html).toContain('Bund');
+    expect(html).toContain('EuroStoxx');
+  });
+
   it('shows progress only when grid is empty (modal owns open price)', () => {
     const html = renderInto(createInitialState());
 
@@ -30,6 +38,6 @@ describe('renderSessionStatus tutorial hints', () => {
     expect(html).toContain('<kbd>X</kbd>');
     expect(html).not.toContain('start-price-input');
     expect(html).not.toContain('set open price');
-    expect(html).toContain('v1.2.3');
+    expect(html).toContain('v1.2.4');
   });
 });

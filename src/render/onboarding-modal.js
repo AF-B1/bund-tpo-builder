@@ -1,11 +1,22 @@
-export function renderOnboardingModal(container, { mode, startPrice, error }) {
+import { getMarket, formatPriceForInput } from '../markets.js';
+
+function openPriceHint(marketId) {
+  const market = getMarket(marketId);
+  if (market.priceFormat === 'integer') {
+    return `Type a whole index point (e.g. ${market.openHint}), then press Enter to start period A.`;
+  }
+  return `Type a price with a decimal (e.g. ${market.openHint}), then press Enter to start period A.`;
+}
+
+export function renderOnboardingModal(container, { mode, startPrice, marketId, error }) {
   if (!mode) {
     container.hidden = true;
     container.innerHTML = '';
     return;
   }
 
-  const price = Number(startPrice).toFixed(2);
+  const price = formatPriceForInput(startPrice, marketId);
+  const hint = openPriceHint(marketId);
   const errorBlock = error
     ? `<p class="onboarding-error" role="alert">${error}</p>`
     : '';
@@ -26,7 +37,7 @@ export function renderOnboardingModal(container, { mode, startPrice, error }) {
     body = `
       <div class="onboarding-hints">
         <p><kbd>Enter</kbd> set open price</p>
-        <p class="onboarding-teach">Type a price with a decimal (e.g. 125.50), then press Enter to start period A.</p>
+        <p class="onboarding-teach">${hint}</p>
       </div>`;
   } else {
     body = `
@@ -37,9 +48,11 @@ export function renderOnboardingModal(container, { mode, startPrice, error }) {
     ? `
       <div class="onboarding-hints">
         <p><kbd>Enter</kbd> set open price</p>
-        <p class="onboarding-teach">Type a price with a decimal (e.g. 125.50), then press Enter to start period A.</p>
+        <p class="onboarding-teach">${hint}</p>
       </div>`
     : '';
+
+  const inputMode = getMarket(marketId).priceFormat === 'integer' ? 'numeric' : 'decimal';
 
   container.hidden = false;
   container.innerHTML = `
@@ -58,7 +71,7 @@ export function renderOnboardingModal(container, { mode, startPrice, error }) {
             type="text"
             class="start-price-input"
             value="${price}"
-            inputmode="decimal"
+            inputmode="${inputMode}"
             aria-label="Session open price"
           />
         </label>

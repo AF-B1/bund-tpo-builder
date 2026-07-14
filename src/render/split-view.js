@@ -1,5 +1,10 @@
 import { VISIBLE_ROWS, SCROLL_EDGE } from '../config.js';
+import { getMarket, formatPrice } from '../markets.js';
 import { priceAtTickIndex, getCell, isOpenPrint } from '../state.js';
+
+export function splitCornerLabel(marketId) {
+  return getMarket(marketId).cornerLabel;
+}
 
 export function splitCellClasses(tickIndex, periodIndex, letter) {
   const classes = ['split-cell'];
@@ -33,7 +38,7 @@ export function renderSplitView(container, state) {
 
   const corner = document.createElement('div');
   corner.className = 'split-corner';
-  corner.textContent = 'BUND';
+  corner.textContent = splitCornerLabel(state.marketId);
   table.appendChild(corner);
 
   for (const period of state.periods) {
@@ -49,7 +54,10 @@ export function renderSplitView(container, state) {
 
     const priceLabel = document.createElement('div');
     priceLabel.className = 'split-price' + (tickIndex === state.cursor.tickIndex ? ' cursor-price' : '');
-    priceLabel.textContent = priceAtTickIndex(tickIndex, state.startPrice).toFixed(2);
+    priceLabel.textContent = formatPrice(
+      priceAtTickIndex(tickIndex, state.startPrice, state.marketId),
+      state.marketId,
+    );
     table.appendChild(priceLabel);
 
     for (let p = 0; p < state.periods.length; p++) {

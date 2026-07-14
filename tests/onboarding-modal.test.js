@@ -12,6 +12,7 @@ describe('renderOnboardingModal', () => {
     const { html, hidden } = renderInto({
       mode: 'welcome',
       startPrice: 125.5,
+      marketId: 'bund',
       error: null,
     });
 
@@ -26,6 +27,7 @@ describe('renderOnboardingModal', () => {
     const { html } = renderInto({
       mode: 'open',
       startPrice: 125.5,
+      marketId: 'bund',
       error: null,
     });
 
@@ -38,6 +40,7 @@ describe('renderOnboardingModal', () => {
     const { html } = renderInto({
       mode: 'reset',
       startPrice: 126.25,
+      marketId: 'bund',
       error: null,
     });
 
@@ -51,6 +54,7 @@ describe('renderOnboardingModal', () => {
     const { html } = renderInto({
       mode: 'open',
       startPrice: 125.5,
+      marketId: 'bund',
       error: 'Enter a price with a decimal point (e.g. 125.50)',
     });
 
@@ -58,9 +62,22 @@ describe('renderOnboardingModal', () => {
     expect(html).toContain('decimal point');
   });
 
+  it('open mode shows integer hint for eurostoxx', () => {
+    const { html } = renderInto({
+      mode: 'open',
+      startPrice: 5012,
+      marketId: 'eurostoxx',
+      error: null,
+    });
+
+    expect(html).toContain('5012');
+    expect(html).toContain('whole index point');
+    expect(html).not.toContain('decimal');
+  });
+
   it('hides container when mode is null', () => {
     const container = { hidden: false, innerHTML: 'old' };
-    renderOnboardingModal(container, { mode: null, startPrice: 125.5, error: null });
+    renderOnboardingModal(container, { mode: null, startPrice: 125.5, marketId: 'bund', error: null });
 
     expect(container.hidden).toBe(true);
     expect(container.innerHTML).toBe('');

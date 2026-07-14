@@ -29,6 +29,7 @@ export function markWelcomeSeen() {
 export function computeModalMode(hasPrints) {
   if (hasPrints) return null;
   if (openPriceTrigger === 'reset') return 'reset';
+  if (openPriceTrigger === 'market-switch') return 'open';
   if (!isWelcomeSeen()) return 'welcome';
   return 'open';
 }

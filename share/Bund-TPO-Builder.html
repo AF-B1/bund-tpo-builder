@@ -161,6 +161,34 @@ body {
   margin-bottom: 12px;
 }
 
+.market-picker {
+  flex-shrink: 0;
+  margin-bottom: 10px;
+}
+
+.market-picker-label {
+  display: block;
+  font-size: 10px;
+  color: #444;
+  margin-bottom: 4px;
+}
+
+.market-select {
+  width: 100%;
+  padding: 4px 6px;
+  font-family: inherit;
+  font-size: 12px;
+  border: 1px solid #888;
+  border-radius: 3px;
+  background: #e8e8e8;
+  color: #111;
+}
+
+.market-select:focus {
+  outline: 1px solid #a000a0;
+  background: #f4f4f4;
+}
+
 .progress-title {
   font-weight: bold;
   color: #333;
@@ -595,13 +623,11 @@ body {
     <div id="onboarding-modal" hidden></div>
   </div>
   <script>
-const START_PRICE = 125.5;
-const TICK_SIZE = 0.01;
 const SESSION_START_HOUR = 7;
 const SESSION_START_MINUTE = 0;
 const PERIOD_MINUTES = 30;
 const INITIAL_PERIOD_COUNT = 19;
-const VISIBLE_ROWS = 30;
+const VISIBLE_ROWS = 60;
 const SCROLL_EDGE = 3;
 const ROW_HEIGHT = 18;
 const COL_WIDTH = 20;
@@ -609,6 +635,11 @@ const PRICE_COL_WIDTH = 58;
 const VALUE_AREA_PCT = 0.688;
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const SESSION_END_LABEL = '16:30';
+
+/** @deprecated use getMarket('bund').defaultStartPrice */
+const START_PRICE = 125.5;
+/** @deprecated use getMarket('bund').tickSize */
+const TICK_SIZE = 0.01;
 
 function pad2(n) {
   return String(n).padStart(2, '0');
@@ -638,12 +669,27 @@ function generatePeriods(count = INITIAL_PERIOD_COUNT) {
   return periods;
 }
 
-function priceAtTickIndex(tickIndex, startPrice = START_PRICE) {
-  return Number((startPrice + tickIndex * TICK_SIZE).toFixed(2));
+function computeInitialVisibleTickStart(openTickIndex = 0) {
+  const targetRow = Math.floor((VISIBLE_ROWS - 1) / 2);
+  return openTickIndex - (VISIBLE_ROWS - 1 - targetRow);
 }
 
-function tickIndexFromPrice(price, startPrice = START_PRICE) {
-  return Math.round((price - startPrice) / TICK_SIZE);
+function tickIndexToVisibleRow(tickIndex, visibleTickStart) {
+  return VISIBLE_ROWS - 1 - (tickIndex - visibleTickStart);
+}
+
+function priceAtTickIndex(tickIndex, startPrice, marketId = DEFAULT_MARKET_ID) {
+  const { tickSize, priceFormat } = getMarket(marketId);
+  const raw = startPrice + tickIndex * tickSize;
+  if (priceFormat === 'integer') {
+    return Math.round(raw);
+  }
+  return Number(raw.toFixed(2));
+}
+
+function tickIndexFromPrice(price, startPrice, marketId = DEFAULT_MARKET_ID) {
+  const { tickSize } = getMarket(marketId);
+  return Math.round((price - startPrice) / tickSize);
 }
 
 function getCell(grid, tickIndex, periodIndex) {
@@ -704,44 +750,54 @@ function snapshotPeriodEntry(state) {
   state.periodEntryCursor = { ...state.cursor };
 }
 
-function parseStartPrice(raw) {
-  const trimmed = String(raw).trim();
-  if (!/^\d+\.\d+$/.test(trimmed)) {
-    return { ok: false, error: 'Enter a price with a decimal point (e.g. 125.50)' };
-  }
+function parseStartPrice(raw, marketId = DEFAULT_MARKET_ID) {
+  return getMarket(marketId).parseOpenPrice(raw);
+}
 
-  const value = Number(Number(trimmed).toFixed(2));
-  if (!Number.isFinite(value) || value <= 0) {
-    return { ok: false, error: 'Enter a valid price' };
-  }
-
-  return { ok: true, value };
+function clearSessionPrints(state) {
+  state.grid = {};
+  state.cursor = { periodIndex: 0, tickIndex: 0 };
+  state.lastPrint = null;
+  state.fullProfileRevealed = false;
+  state.visibleTickStart = computeInitialVisibleTickStart(0);
+  state.periodEntryCursor = null;
 }
 
 function applyStartPrice(state, raw) {
-  const parsed = parseStartPrice(raw);
+  const parsed = parseStartPrice(raw, state.marketId);
   if (!parsed.ok) return parsed;
 
   state.startPrice = parsed.value;
-  state.grid = {};
-  state.cursor = { periodIndex: 0, tickIndex: 0 };
-  state.visibleTickStart = -Math.floor(VISIBLE_ROWS / 2);
-  state.fullProfileRevealed = false;
-  state.periodEntryCursor = null;
+  clearSessionPrints(state);
   setCell(state.grid, 0, 0, 'A');
   state.lastPrint = { periodIndex: 0, tickIndex: 0 };
 
   return { ok: true };
 }
 
+function switchMarket(state, marketId) {
+  if (state.marketId === marketId) {
+    return { ok: true, changed: false };
+  }
+
+  const market = getMarket(marketId);
+  state.marketId = marketId;
+  state.startPrice = market.defaultStartPrice;
+  clearSessionPrints(state);
+
+  return { ok: true, changed: true };
+}
+
 function createInitialState() {
+  const market = getMarket(DEFAULT_MARKET_ID);
   return {
+    marketId: DEFAULT_MARKET_ID,
     grid: {},
     cursor: { periodIndex: 0, tickIndex: 0 },
     lastPrint: null,
-    startPrice: START_PRICE,
+    startPrice: market.defaultStartPrice,
     fullProfileRevealed: false,
-    visibleTickStart: -Math.floor(VISIBLE_ROWS / 2),
+    visibleTickStart: computeInitialVisibleTickStart(0),
     periodEntryCursor: null,
     periods: generatePeriods(),
   };
@@ -749,7 +805,9 @@ function createInitialState() {
 
 function resetState(state) {
   const savedStart = state.startPrice;
+  const savedMarket = state.marketId;
   const fresh = createInitialState();
+  fresh.marketId = savedMarket;
   fresh.startPrice = savedStart;
   Object.assign(state, fresh);
   return state;
@@ -861,6 +919,10 @@ function computeAnalytics(state) {
   return { counts, pocIndex, valueArea, ibr, merged, closePrice, closeTick: state.lastPrint?.tickIndex ?? null };
 }
 
+function splitCornerLabel(marketId) {
+  return getMarket(marketId).cornerLabel;
+}
+
 function splitCellClasses(tickIndex, periodIndex, letter) {
   const classes = ['split-cell'];
   if (letter) {
@@ -893,7 +955,7 @@ function renderSplitView(container, state) {
 
   const corner = document.createElement('div');
   corner.className = 'split-corner';
-  corner.textContent = 'BUND';
+  corner.textContent = splitCornerLabel(state.marketId);
   table.appendChild(corner);
 
   for (const period of state.periods) {
@@ -909,7 +971,10 @@ function renderSplitView(container, state) {
 
     const priceLabel = document.createElement('div');
     priceLabel.className = 'split-price' + (tickIndex === state.cursor.tickIndex ? ' cursor-price' : '');
-    priceLabel.textContent = priceAtTickIndex(tickIndex, state.startPrice).toFixed(2);
+    priceLabel.textContent = formatPrice(
+      priceAtTickIndex(tickIndex, state.startPrice, state.marketId),
+      state.marketId,
+    );
     table.appendChild(priceLabel);
 
     for (let p = 0; p < state.periods.length; p++) {
@@ -1031,6 +1096,15 @@ function applyLayout(shell, state) {
   }
 }
 
+function renderMarketOptions(marketId) {
+  return listMarkets()
+    .map((market) => {
+      const selected = market.id === marketId ? ' selected' : '';
+      return `<option value="${market.id}"${selected}>${market.label}</option>`;
+    })
+    .join('');
+}
+
 function renderSessionStatus(container, state) {
   const period = state.periods[state.cursor.periodIndex];
   const total = state.periods.length;
@@ -1057,12 +1131,17 @@ function renderSessionStatus(container, state) {
       <p class="status-teach">Build one period at a time. <kbd>X</kbd> redoes this bracket without resetting the whole session.</p>`
     : '';
 
+  const cursorPrice = formatPrice(
+    priceAtTickIndex(state.cursor.tickIndex, state.startPrice, state.marketId),
+    state.marketId,
+  );
+
   const statusBlock = sessionStarted
     ? `
     <div class="status-current">
       <div class="status-print"><span class="status-letter">${period.letter}</span> print</div>
       <div class="status-time">${period.timeRange}</div>
-      <div class="status-price">@ ${priceAtTickIndex(state.cursor.tickIndex, state.startPrice).toFixed(2)}</div>
+      <div class="status-price">@ ${cursorPrice}</div>
     </div>`
     : '';
 
@@ -1070,11 +1149,17 @@ function renderSessionStatus(container, state) {
     ? `
     <div class="status-guide">
       ${guideBlock}
-      <p class="changelog-link"><a href="changelog.html">Changelog</a> Â· v1.2.3</p>
+      <p class="changelog-link"><a href="changelog.html">Changelog</a> Â· v1.2.4</p>
     </div>`
     : '';
 
   container.innerHTML = `
+    <div class="market-picker">
+      <label class="market-picker-label" for="market-select">Market</label>
+      <select id="market-select" class="market-select" aria-label="Select market">
+        ${renderMarketOptions(state.marketId)}
+      </select>
+    </div>
     <div class="session-progress">
       <div class="progress-title">07:00 â€“ 16:30</div>
       <div class="progress-v-layout">
@@ -1124,18 +1209,28 @@ function markWelcomeSeen() {
 function computeModalMode(hasPrints) {
   if (hasPrints) return null;
   if (openPriceTrigger === 'reset') return 'reset';
+  if (openPriceTrigger === 'market-switch') return 'open';
   if (!isWelcomeSeen()) return 'welcome';
   return 'open';
 }
 
-function renderOnboardingModal(container, { mode, startPrice, error }) {
+function openPriceHint(marketId) {
+  const market = getMarket(marketId);
+  if (market.priceFormat === 'integer') {
+    return `Type a whole index point (e.g. ${market.openHint}), then press Enter to start period A.`;
+  }
+  return `Type a price with a decimal (e.g. ${market.openHint}), then press Enter to start period A.`;
+}
+
+function renderOnboardingModal(container, { mode, startPrice, marketId, error }) {
   if (!mode) {
     container.hidden = true;
     container.innerHTML = '';
     return;
   }
 
-  const price = Number(startPrice).toFixed(2);
+  const price = formatPriceForInput(startPrice, marketId);
+  const hint = openPriceHint(marketId);
   const errorBlock = error
     ? `<p class="onboarding-error" role="alert">${error}</p>`
     : '';
@@ -1156,7 +1251,7 @@ function renderOnboardingModal(container, { mode, startPrice, error }) {
     body = `
       <div class="onboarding-hints">
         <p><kbd>Enter</kbd> set open price</p>
-        <p class="onboarding-teach">Type a price with a decimal (e.g. 125.50), then press Enter to start period A.</p>
+        <p class="onboarding-teach">${hint}</p>
       </div>`;
   } else {
     body = `
@@ -1167,9 +1262,11 @@ function renderOnboardingModal(container, { mode, startPrice, error }) {
     ? `
       <div class="onboarding-hints">
         <p><kbd>Enter</kbd> set open price</p>
-        <p class="onboarding-teach">Type a price with a decimal (e.g. 125.50), then press Enter to start period A.</p>
+        <p class="onboarding-teach">${hint}</p>
       </div>`
     : '';
+
+  const inputMode = getMarket(marketId).priceFormat === 'integer' ? 'numeric' : 'decimal';
 
   container.hidden = false;
   container.innerHTML = `
@@ -1188,7 +1285,7 @@ function renderOnboardingModal(container, { mode, startPrice, error }) {
             type="text"
             class="start-price-input"
             value="${price}"
-            inputmode="decimal"
+            inputmode="${inputMode}"
             aria-label="Session open price"
           />
         </label>
@@ -1333,15 +1430,32 @@ function bindStartPriceInput() {
   input.select();
 }
 
+function bindMarketSelect() {
+  const select = statusRoot.querySelector('.market-select');
+  if (!select || select.dataset.bound === 'true') return;
+
+  select.dataset.bound = 'true';
+  select.addEventListener('change', () => {
+    const result = switchMarket(state, select.value);
+    if (!result.changed) return;
+
+    lastPriceError = null;
+    setOpenPriceTrigger('market-switch');
+    render();
+  });
+}
+
 function render() {
   applyLayout(shell, state);
   renderSplitView(splitRoot, state);
   renderSessionStatus(statusRoot, state);
+  bindMarketSelect();
 
   const modalMode = computeModalMode(hasPrints(state));
   renderOnboardingModal(modalRoot, {
     mode: modalMode,
     startPrice: state.startPrice,
+    marketId: state.marketId,
     error: lastPriceError,
   });
 

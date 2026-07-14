@@ -154,6 +154,34 @@ body {
   margin-bottom: 12px;
 }
 
+.market-picker {
+  flex-shrink: 0;
+  margin-bottom: 10px;
+}
+
+.market-picker-label {
+  display: block;
+  font-size: 10px;
+  color: #444;
+  margin-bottom: 4px;
+}
+
+.market-select {
+  width: 100%;
+  padding: 4px 6px;
+  font-family: inherit;
+  font-size: 12px;
+  border: 1px solid #888;
+  border-radius: 3px;
+  background: #e8e8e8;
+  color: #111;
+}
+
+.market-select:focus {
+  outline: 1px solid #a000a0;
+  background: #f4f4f4;
+}
+
 .progress-title {
   font-weight: bold;
   color: #333;

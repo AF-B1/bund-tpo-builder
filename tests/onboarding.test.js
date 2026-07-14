@@ -49,6 +49,11 @@ describe('onboarding helpers', () => {
     expect(computeModalMode(false)).toBe('reset');
   });
 
+  it('computeModalMode returns open on market-switch without welcome', () => {
+    setOpenPriceTrigger('market-switch');
+    expect(computeModalMode(false)).toBe('open');
+  });
+
   it('computeModalMode returns null when prints exist', () => {
     expect(computeModalMode(true)).toBe(null);
   });

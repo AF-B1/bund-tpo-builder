@@ -2,6 +2,18 @@
 
 All notable changes to Bund TPO Builder.
 
+## [1.2.4] — 2026-07-14
+
+### Added
+- Market dropdown in column 1: **Bund** or **EuroStoxx (FESX)** — integer index-point ticks for Euro Stoxx 50 (1 point per tick, e.g. 5012 → 5013)
+- Switching markets resets the session and opens the open-price modal (no welcome screen on switch)
+
+### Changed
+- Visible price ladder **doubled to 60 rows**; session open starts at the **vertical center** of the visible grid (equal room above and below)
+- Grid corner label shows **BUND** or **FESX** per market
+- EuroStoxx open price: whole index points only; Bund keeps decimal required (e.g. 125.50)
+- Rebuilt standalone share bundle (`share/Bund-TPO-Builder.html`)
+
 ## [1.2.3] — 2026-07-14
 
 ### Fixed
@@ -87,6 +99,7 @@ First public release.
 - GitHub Pages live link
 - Standalone zip for local use (`START HERE.bat`)
 
+[1.2.4]: https://github.com/AF-B1/bund-tpo-builder/releases/tag/v1.2.4
 [1.2.3]: https://github.com/AF-B1/bund-tpo-builder/releases/tag/v1.2.3
 [1.2.2]: https://github.com/AF-B1/bund-tpo-builder/releases/tag/v1.2.2
 [1.2.1]: https://github.com/AF-B1/bund-tpo-builder/releases/tag/v1.2.1

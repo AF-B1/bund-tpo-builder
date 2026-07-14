@@ -1,4 +1,14 @@
+import { formatPrice, listMarkets } from '../markets.js';
 import { priceAtTickIndex, hasPrints } from '../state.js';
+
+export function renderMarketOptions(marketId) {
+  return listMarkets()
+    .map((market) => {
+      const selected = market.id === marketId ? ' selected' : '';
+      return `<option value="${market.id}"${selected}>${market.label}</option>`;
+    })
+    .join('');
+}
 
 export function renderSessionStatus(container, state) {
   const period = state.periods[state.cursor.periodIndex];
@@ -26,12 +36,17 @@ export function renderSessionStatus(container, state) {
       <p class="status-teach">Build one period at a time. <kbd>X</kbd> redoes this bracket without resetting the whole session.</p>`
     : '';
 
+  const cursorPrice = formatPrice(
+    priceAtTickIndex(state.cursor.tickIndex, state.startPrice, state.marketId),
+    state.marketId,
+  );
+
   const statusBlock = sessionStarted
     ? `
     <div class="status-current">
       <div class="status-print"><span class="status-letter">${period.letter}</span> print</div>
       <div class="status-time">${period.timeRange}</div>
-      <div class="status-price">@ ${priceAtTickIndex(state.cursor.tickIndex, state.startPrice).toFixed(2)}</div>
+      <div class="status-price">@ ${cursorPrice}</div>
     </div>`
     : '';
 
@@ -39,11 +54,17 @@ export function renderSessionStatus(container, state) {
     ? `
     <div class="status-guide">
       ${guideBlock}
-      <p class="changelog-link"><a href="changelog.html">Changelog</a> · v1.2.3</p>
+      <p class="changelog-link"><a href="changelog.html">Changelog</a> · v1.2.4</p>
     </div>`
     : '';
 
   container.innerHTML = `
+    <div class="market-picker">
+      <label class="market-picker-label" for="market-select">Market</label>
+      <select id="market-select" class="market-select" aria-label="Select market">
+        ${renderMarketOptions(state.marketId)}
+      </select>
+    </div>
     <div class="session-progress">
       <div class="progress-title">07:00 – 16:30</div>
       <div class="progress-v-layout">
